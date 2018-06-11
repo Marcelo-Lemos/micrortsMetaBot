@@ -1,7 +1,9 @@
 package sarsa;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ai.core.AI;
 import ai.core.AIWithComputationBudget;
@@ -12,11 +14,20 @@ import rts.units.UnitTypeTable;
 
 public class SarsaBot extends AIWithComputationBudget {
     UnitTypeTable m_utt = null;
+    
+    private Map<String, Float> features;
+    private Map<String, Float> weights;
 
-    // This is the default constructor that microRTS will call:
+   /**
+    * Initializes SarsaBot
+    * @param utt
+    */
     public SarsaBot(UnitTypeTable utt) {
         super(-1,-1);
         m_utt = utt;
+        
+        features = new HashMap<>();
+        weights = new HashMap<>();
     }
 
     // This will be called by microRTS when it wants to create new instances of this bot (e.g., to play multiple games).
