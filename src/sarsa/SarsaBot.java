@@ -16,7 +16,7 @@ public class SarsaBot extends AIWithComputationBudget {
     UnitTypeTable m_utt = null;
     
     private Map<String, Float> features;
-    private Map<String, Float> weights;
+    private Map<AI,Map<String, Float>> weights; //one weight vector for each action/AI I can choose
 
    /**
     * Initializes SarsaBot
@@ -32,6 +32,7 @@ public class SarsaBot extends AIWithComputationBudget {
 
     // This will be called by microRTS when it wants to create new instances of this bot (e.g., to play multiple games).
     public AI clone() {
+    	//TODO copy features and weights
         return new SarsaBot(m_utt);
     }
     
