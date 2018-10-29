@@ -7,6 +7,7 @@ import java.util.Map;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.units.Unit;
+import rts.units.UnitType;
 
 /**
  * Extract features from a microRTS {@link GameState}
@@ -18,7 +19,7 @@ public class FeatureExtractor {
 		
 	}
 	
-	public Map<String, Float> getFeatureVector(GameState gs, int player) {
+	public Map<String, Float> getFeatureVector(GameState state, int player) {
         
 		
 		Map<String, Float> features = new HashMap<>();
@@ -27,39 +28,46 @@ public class FeatureExtractor {
 		int opponent = 1 - player;
         
         // divides the map in 9 quadrants
-		int horizQuadLength = gs.getPhysicalGameState().getWidth() / 3;
-		int vertQuadLength = gs.getPhysicalGameState().getHeight() / 3;
+		int horizQuadLength = state.getPhysicalGameState().getWidth() / 3;
+		int vertQuadLength = state.getPhysicalGameState().getHeight() / 3;
         
-        // for each quadrant, counts the number of units of each type
-        // also count the average cumulative health
+        // for each quadrant, counts the number of units of each type per player
+        // TODO: also count the average health of units owned by each player
 		for (int horizQuad = 0; horizQuad < 3; horizQuad++){
 			for (int vertQuad = 0; vertQuad < 3; vertQuad++){
 				
-				Collection<Unit> unitsInQuad = gs.getPhysicalGameState().getUnitsAround(
+				Collection<Unit> unitsInQuad = state.getPhysicalGameState().getUnitsAround(
 					horizQuad*horizQuadLength, vertQuad*vertQuadLength, horizQuadLength
 				);
 				
-				// TODO group by player and type
+				//Map<Unit, int> unitCounter
+				
+				// initializes the unit count of each type and player as zero
+				// also initializes the average health of units owned per player as zero
+				for(int p = 0; p < 2; p++){ // p for each player
+					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){ //type for each unit type
+						features.put(unitCountFeatureName(horizQuad, vertQuad, p, type), 0.0f);
+						features.put(avgHealthFeatureName(horizQuad, vertQuad, p), 0.0f);
+					}
+				}
+				
+				// traverses the list of units in quadrant, incrementing their feature count
 				for(Unit u : unitsInQuad){
-					// feature name: unit-quad-xquad-yquad-player-type
-					String featureName = String.format(
-						"unit-quad-%d-%d-%d-%s", 
-						horizQuad, vertQuad, u.getPlayer(), u.getType().name
-					);
+					String featureName = unitCountFeatureName(horizQuad, vertQuad, u.getPlayer(), u.getType());
 					
-					
+					// counts and increment the number of the given unit in the current quadrant
+					features.put(featureName, features.get(featureName) + 1 );
 				}
 				
 			}
-			
-		}
+		}	
         
         // adds the resources
-        features.put("resorces-own", (float)gs.getPlayer(player).getResources());
-        features.put("resorces-opp", (float)gs.getPlayer(opponent).getResources());
+        features.put("resorces-own", (float)state.getPlayer(player).getResources());
+        features.put("resorces-opp", (float)state.getPlayer(opponent).getResources());
         
         // adds game time
-        features.put("time", (float)gs.getTime());
+        features.put("time", (float)state.getTime());
         
         // normalizes
         
@@ -71,5 +79,37 @@ public class FeatureExtractor {
         
         
     }   
+	
+	/**
+	 * Returns the feature name for unit count, given 
+	 * the quadrant, unit owner and unit type
+	 * @param xQuad
+	 * @param yQuad
+	 * @param owner
+	 * @param type
+	 * @return
+	 */
+	private String unitCountFeatureName(int xQuad, int yQuad, int owner, UnitType type){
+		// feature name: unit_quad-x-y-owner-type
+		return String.format(
+			StateFeatures.UNIT_COUNT + "-%d-%d-%d-%s", 
+			xQuad, yQuad, owner, type.name
+		);
+	}
+	
+	/**
+	 * Returns the corresponding feature name for average unit health, given
+	 * the quadrant and player
+	 * @param xQuad
+	 * @param yQuad
+	 * @param player
+	 * @return
+	 */
+	private String avgHealthFeatureName(int xQuad, int yQuad, int player){
+		return String.format(
+			StateFeatures.AVG_HEALTH + "-%d-%d-%d", 
+			xQuad, yQuad, player
+		);
+	}
 
 }
