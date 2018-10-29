@@ -1,6 +1,6 @@
 package sarsa;
 
-public class StateFeatures {
+public class FeatureNames {
 	
 	public static final String UNIT_COUNT = "unit_count";	//to be concatenated with quadrant, player and unit type
 	public static final String AVG_HEALTH = "avg_health"; 	//to be concatenated with quadrant and player

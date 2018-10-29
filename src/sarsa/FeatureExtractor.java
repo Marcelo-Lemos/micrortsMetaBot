@@ -36,35 +36,53 @@ public class FeatureExtractor {
 		for (int horizQuad = 0; horizQuad < 3; horizQuad++){
 			for (int vertQuad = 0; vertQuad < 3; vertQuad++){
 				
+				// arrays counting the sum of hit points and number of units owned by each player
+				float hpSum[] = new float[2];
+				int unitCount[] = new int[2];
+				
+				// a collection of units in this quadrant:
 				Collection<Unit> unitsInQuad = state.getPhysicalGameState().getUnitsAround(
 					horizQuad*horizQuadLength, vertQuad*vertQuadLength, horizQuadLength
 				);
 				
-				//Map<Unit, int> unitCounter
-				
 				// initializes the unit count of each type and player as zero
-				// also initializes the average health of units owned per player as zero
+				// also initializes the sum of HP of units owned per player as zero
 				for(int p = 0; p < 2; p++){ // p for each player
+					//unitCountPerQuad.put(p, new HashMap<>());
+					hpSum[p] = 0;
+					unitCount[p] = 0;
+					
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){ //type for each unit type
-						features.put(unitCountFeatureName(horizQuad, vertQuad, p, type), 0.0f);
-						features.put(avgHealthFeatureName(horizQuad, vertQuad, p), 0.0f);
+						//unitCountPerQuad.get(p).put(type, 0);
+						
+						features.put(unitTypeCountFeatureName(horizQuad, vertQuad, p, type), 0.0f);
+						
 					}
 				}
 				
 				// traverses the list of units in quadrant, incrementing their feature count
 				for(Unit u : unitsInQuad){
-					String featureName = unitCountFeatureName(horizQuad, vertQuad, u.getPlayer(), u.getType());
+					unitCount[u.getPlayer()]++;
+					hpSum[u.getPlayer()] += u.getHitPoints();
+					
+					String name = unitTypeCountFeatureName(horizQuad, vertQuad, u.getPlayer(), u.getType());
 					
 					// counts and increment the number of the given unit in the current quadrant
-					features.put(featureName, features.get(featureName) + 1 );
+					features.put(name, features.get(name) + 1 );
+				}
+				
+				// computes the average HP of units owned by each player
+				for(int p = 0; p < 2; p++){ // p for each player
+					float avgHP = unitCount[p] != 0 ? hpSum[p] / unitCount[p] : 0;
+					features.put(avgHealthFeatureName(horizQuad, vertQuad, p), avgHP);
 				}
 				
 			}
 		}	
         
         // adds the resources
-        features.put("resorces-own", (float)state.getPlayer(player).getResources());
-        features.put("resorces-opp", (float)state.getPlayer(opponent).getResources());
+        features.put(FeatureNames.RESOURCES_OWN, (float)state.getPlayer(player).getResources());
+        features.put(FeatureNames.RESOURCES_OPP, (float)state.getPlayer(opponent).getResources());
         
         // adds game time
         features.put("time", (float)state.getTime());
@@ -89,10 +107,10 @@ public class FeatureExtractor {
 	 * @param type
 	 * @return
 	 */
-	private String unitCountFeatureName(int xQuad, int yQuad, int owner, UnitType type){
+	private String unitTypeCountFeatureName(int xQuad, int yQuad, int owner, UnitType type){
 		// feature name: unit_quad-x-y-owner-type
 		return String.format(
-			StateFeatures.UNIT_COUNT + "-%d-%d-%d-%s", 
+			FeatureNames.UNIT_COUNT + "-%d-%d-%d-%s", 
 			xQuad, yQuad, owner, type.name
 		);
 	}
@@ -107,7 +125,7 @@ public class FeatureExtractor {
 	 */
 	private String avgHealthFeatureName(int xQuad, int yQuad, int player){
 		return String.format(
-			StateFeatures.AVG_HEALTH + "-%d-%d-%d", 
+			FeatureNames.AVG_HEALTH + "-%d-%d-%d", 
 			xQuad, yQuad, player
 		);
 	}
