@@ -55,7 +55,7 @@ public class FeatureExtractor {
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){ //type for each unit type
 						//unitCountPerQuad.get(p).put(type, 0);
 						
-						features.put(unitTypeCountFeatureName(horizQuad, vertQuad, p, type), 0.0f);
+						features.put(FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, p, type), 0.0f);
 						
 					}
 				}
@@ -65,7 +65,7 @@ public class FeatureExtractor {
 					unitCount[u.getPlayer()]++;
 					hpSum[u.getPlayer()] += u.getHitPoints();
 					
-					String name = unitTypeCountFeatureName(horizQuad, vertQuad, u.getPlayer(), u.getType());
+					String name = FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, u.getPlayer(), u.getType());
 					
 					// counts and increment the number of the given unit in the current quadrant
 					features.put(name, features.get(name) + 1 );
@@ -74,7 +74,7 @@ public class FeatureExtractor {
 				// computes the average HP of units owned by each player
 				for(int p = 0; p < 2; p++){ // p for each player
 					float avgHP = unitCount[p] != 0 ? hpSum[p] / unitCount[p] : 0;
-					features.put(avgHealthFeatureName(horizQuad, vertQuad, p), avgHP);
+					features.put(FeatureNames.avgHealthPerQuad(horizQuad, vertQuad, p), avgHP);
 				}
 				
 			}
@@ -98,36 +98,6 @@ public class FeatureExtractor {
         
     }   
 	
-	/**
-	 * Returns the feature name for unit count, given 
-	 * the quadrant, unit owner and unit type
-	 * @param xQuad
-	 * @param yQuad
-	 * @param owner
-	 * @param type
-	 * @return
-	 */
-	private String unitTypeCountFeatureName(int xQuad, int yQuad, int owner, UnitType type){
-		// feature name: unit_quad-x-y-owner-type
-		return String.format(
-			FeatureNames.UNIT_COUNT + "-%d-%d-%d-%s", 
-			xQuad, yQuad, owner, type.name
-		);
-	}
 	
-	/**
-	 * Returns the corresponding feature name for average unit health, given
-	 * the quadrant and player
-	 * @param xQuad
-	 * @param yQuad
-	 * @param player
-	 * @return
-	 */
-	private String avgHealthFeatureName(int xQuad, int yQuad, int player){
-		return String.format(
-			FeatureNames.AVG_HEALTH + "-%d-%d-%d", 
-			xQuad, yQuad, player
-		);
-	}
 
 }
