@@ -15,8 +15,13 @@ import rts.units.UnitType;
  *
  */
 public class FeatureExtractor {
+	int numQuadrants;
+	
 	public FeatureExtractor(){
+		numQuadrants = 3;
 		
+		//TODO resume with feature properties
+		Map<String, FeatureProperty> featureProperties = new HashMap<>();
 	}
 	
 	public Map<String, Float> getFeatureVector(GameState state, int player) {
@@ -28,13 +33,13 @@ public class FeatureExtractor {
 		int opponent = 1 - player;
         
         // divides the map in 9 quadrants
-		int horizQuadLength = state.getPhysicalGameState().getWidth() / 3;
-		int vertQuadLength = state.getPhysicalGameState().getHeight() / 3;
+		int horizQuadLength = state.getPhysicalGameState().getWidth() / numQuadrants;
+		int vertQuadLength = state.getPhysicalGameState().getHeight() / numQuadrants;
         
         // for each quadrant, counts the number of units of each type per player
         // TODO: also count the average health of units owned by each player
-		for (int horizQuad = 0; horizQuad < 3; horizQuad++){
-			for (int vertQuad = 0; vertQuad < 3; vertQuad++){
+		for (int horizQuad = 0; horizQuad < numQuadrants; horizQuad++){
+			for (int vertQuad = 0; vertQuad < numQuadrants; vertQuad++){
 				
 				// arrays counting the sum of hit points and number of units owned by each player
 				float hpSum[] = new float[2];
@@ -54,6 +59,7 @@ public class FeatureExtractor {
 					
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){ //type for each unit type
 						//unitCountPerQuad.get(p).put(type, 0);
+						if(type.isResource) continue;	//ignores resources
 						
 						features.put(FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, p, type), 0.0f);
 						
@@ -62,6 +68,8 @@ public class FeatureExtractor {
 				
 				// traverses the list of units in quadrant, incrementing their feature count
 				for(Unit u : unitsInQuad){
+					if(u.getType().isResource) continue;	//ignores resources
+					
 					unitCount[u.getPlayer()]++;
 					hpSum[u.getPlayer()] += u.getHitPoints();
 					
@@ -80,23 +88,27 @@ public class FeatureExtractor {
 			}
 		}	
         
-        // adds the resources
+        // adds the resources owned by the players
         features.put(FeatureNames.RESOURCES_OWN, (float)state.getPlayer(player).getResources());
         features.put(FeatureNames.RESOURCES_OPP, (float)state.getPlayer(opponent).getResources());
         
         // adds game time
-        features.put("time", (float)state.getTime());
+        features.put(FeatureNames.GAME_TIME, (float)state.getTime());
         
         // normalizes
         
         // adds the bias
-        features.put("bias", 1.0f);
+        features.put(FeatureNames.BIAS, 1.0f);
         
         
         return features;
         
-        
+  
     }   
+	
+	private void normalize(Map<String, Float> features){
+		
+	}
 	
 	
 
