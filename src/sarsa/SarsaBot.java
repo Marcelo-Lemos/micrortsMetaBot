@@ -8,15 +8,21 @@ import java.util.Map;
 import ai.core.AI;
 import ai.core.AIWithComputationBudget;
 import ai.core.ParameterSpecification;
+import features.Feature;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.units.UnitTypeTable;
 
 public class SarsaBot extends AIWithComputationBudget {
-    UnitTypeTable m_utt = null;
+    UnitTypeTable myUnitTypeTable = null;
     
-    private Map<String, Float> features;
-    private Map<AI,Map<String, Float>> weights; //one weight vector for each action/AI I can choose
+    private Map<String, Feature> features;
+    
+    /**
+     * One weight 'vector' for each action/AI I can choose.
+     * Each weight 'vector' is indexed by the corresponding feature name. 
+     */
+    private Map<AI, Map<String, Float>> weights; 
 
    /**
     * Initializes SarsaBot
@@ -24,16 +30,17 @@ public class SarsaBot extends AIWithComputationBudget {
     */
     public SarsaBot(UnitTypeTable utt) {
         super(-1,-1);
-        m_utt = utt;
+        myUnitTypeTable = utt;
         
-        features = new HashMap<>();
+        //TODO initialize array of weight vector for each AI in the portfolio
+        
         weights = new HashMap<>();
     }
 
     // This will be called by microRTS when it wants to create new instances of this bot (e.g., to play multiple games).
     public AI clone() {
     	//TODO copy features and weights
-        return new SarsaBot(m_utt);
+        return new SarsaBot(myUnitTypeTable);
     }
     
     // This will be called once at the beginning of each new game:    
