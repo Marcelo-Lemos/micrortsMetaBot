@@ -4,7 +4,7 @@ import java.util.Map;
 
 import rts.GameState;
 
-public interface FeatureExtractor {
+abstract class FeatureExtractor {
 	
 	/**
 	 * Returns the features associated with a {@link GameState} from the point
@@ -13,7 +13,7 @@ public interface FeatureExtractor {
 	 * @param player
 	 * @return
 	 */
-	public Map<String, Feature> getFeatures(GameState state, int player); 
+	public abstract Map<String, Feature> getFeatures(GameState state, int player); 
 	
 	/**
 	 * Returns the features associated with a {@link GameState} from the point
@@ -24,6 +24,13 @@ public interface FeatureExtractor {
 	 * @param player
 	 * @return
 	 */
-	public Map<String, Feature> getNormalizedFeatures(GameState state, int player);
+	public Map<String, Feature> getNormalizedFeatures(GameState state, int player) {
+		Map<String, Feature> features = getFeatures(state, player);
+		
+        for(Feature f: features.values()){
+        	f.minMaxScaling();
+        }
+        return features;
+	}
 
 }

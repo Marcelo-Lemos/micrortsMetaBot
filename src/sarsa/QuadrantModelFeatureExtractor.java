@@ -20,7 +20,7 @@ import rts.units.UnitType;
  * @author anderson
  *
  */
-public class QuadrantModelFeatureExtractor implements FeatureExtractor {
+public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 	int numQuadrants;
 	
 	public QuadrantModelFeatureExtractor(int numQuadrants, int maxGameTime){
@@ -156,17 +156,4 @@ public class QuadrantModelFeatureExtractor implements FeatureExtractor {
   
     }   
 	
-	@Override
-	public Map<String, Feature> getNormalizedFeatures(GameState state, int player) {
-		//gets the features, normalizes them via min-max scaling and returns
-		Map<String, Feature> features = getFeatures(state, player);
-		
-        for(Feature f: features.values()){
-        	f.minMaxScaling();
-        }
-        return features;
-	}
-	
-	
-
 }
