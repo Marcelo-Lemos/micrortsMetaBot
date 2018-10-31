@@ -1,4 +1,4 @@
-package sarsa;
+package features;
 
 import java.util.Collection;
 import java.util.HashMap;

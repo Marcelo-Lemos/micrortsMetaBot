@@ -1,4 +1,4 @@
-package sarsa;
+package features;
 
 import rts.units.UnitType;
 

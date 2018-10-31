@@ -1,4 +1,4 @@
-package sarsa;
+package features;
 
 public class Feature {
 	public float max;
