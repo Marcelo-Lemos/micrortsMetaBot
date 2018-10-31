@@ -21,7 +21,7 @@ public class FeatureExtractor {
 		numQuadrants = 3;
 		
 		//TODO resume with feature properties
-		Map<String, FeatureProperty> featureProperties = new HashMap<>();
+		Map<String, Feature> featureProperties = new HashMap<>();
 	}
 	
 	public Map<String, Float> getFeatureVector(GameState state, int player) {
