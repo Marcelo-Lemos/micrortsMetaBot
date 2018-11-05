@@ -32,27 +32,27 @@ public class MetaBot extends AI {
     /**
      * For feature calculation, the map will be divided in numQuadrants x numQuadrants
      */
-    int numQuadrants;
+    private int numQuadrants;
     
     /**
      * Probability of exploration
      */
-    float epsilon;
+    private float epsilon;
     
     /**
      * Learning rate
      */
-    float alpha;
+    private float alpha;
     
     /**
      * Discount factor
      */
-    float gamma;
+    private float gamma;
     
     /**
      * Eligibility trace
      */
-    float lambda;
+    private float lambda;
     
     /**
      * Will return the feature values according to state
@@ -247,7 +247,9 @@ public class MetaBot extends AI {
     }
     
     /**
-     * Updates the weight vector of the current action (choice) using the Sarsa rule
+     * Updates the weight vector of the current action (choice) using the Sarsa rule:
+     * delta = r + gamma * Q(s',a') - Q(s,a)
+     * w_i <- w_i + alpha*delta*f_i (where w_i is the i-th weight and f_i the i-th feature)
      * 
      * @param state s in Sarsa equation
      * @param choice a in Sarsa equation
@@ -266,13 +268,13 @@ public class MetaBot extends AI {
     	float q = qValue(stateFeatures, choice);
     	float futureQ = qValue(nextStateFeatures, nextChoice);
     	
-    	//delta in Sarsa equation
-    	float tdError = reward + gamma * futureQ - q;
+    	//the temporal-difference error (delta in Sarsa equation)
+    	float delta = reward + gamma * futureQ - q;
     	
     	for(String featureName : stateFeatures.keySet()){
     		//retrieves the weight value, updates it and stores the updated value
     		float weightValue = weights.get(choice).get(featureName);
-    		weightValue += alpha * tdError * stateFeatures.get(featureName).getValue();
+    		weightValue += alpha * delta * stateFeatures.get(featureName).getValue();
     		weights.get(choice).put(featureName, weightValue);
     	}
     	
@@ -301,7 +303,7 @@ public class MetaBot extends AI {
     }
     
     /**
-     * Returns the Q-value of a choice, for a given set of features
+     * Returns the Q-value of a choice (action), for a given set of features
      * @param features
      * @param choice
      * @return
