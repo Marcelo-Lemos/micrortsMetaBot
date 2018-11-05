@@ -13,7 +13,7 @@ import rts.GameState;
 import rts.PlayerAction;
 import rts.units.UnitTypeTable;
 
-public class SarsaBot extends AIWithComputationBudget {
+public class MetaBot extends AIWithComputationBudget {
     UnitTypeTable myUnitTypeTable = null;
     
     private Map<String, Feature> features;
@@ -28,11 +28,11 @@ public class SarsaBot extends AIWithComputationBudget {
     * Initializes SarsaBot
     * @param utt
     */
-    public SarsaBot(UnitTypeTable utt) {
+    public MetaBot(UnitTypeTable utt) {
         super(-1,-1);
         myUnitTypeTable = utt;
         
-        //TODO initialize array of weight vector for each AI in the portfolio
+        //TODO initialize array of weight vectors for each AI in the portfolio
         
         weights = new HashMap<>();
     }
@@ -40,7 +40,7 @@ public class SarsaBot extends AIWithComputationBudget {
     // This will be called by microRTS when it wants to create new instances of this bot (e.g., to play multiple games).
     public AI clone() {
     	//TODO copy features and weights
-        return new SarsaBot(myUnitTypeTable);
+        return new MetaBot(myUnitTypeTable);
     }
     
     // This will be called once at the beginning of each new game:    
