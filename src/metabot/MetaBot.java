@@ -10,7 +10,6 @@ import ai.abstraction.LightRush;
 import ai.abstraction.RangedRush;
 import ai.abstraction.WorkerRush;
 import ai.core.AI;
-import ai.core.AIWithComputationBudget;
 import ai.core.ParameterSpecification;
 import features.Feature;
 import metabot.portfolio.BuildBarracks;
@@ -19,16 +18,16 @@ import rts.GameState;
 import rts.PlayerAction;
 import rts.units.UnitTypeTable;
 
-public class MetaBot extends AIWithComputationBudget {
+public class MetaBot extends AI {
     UnitTypeTable myUnitTypeTable = null;
     
     private Map<String, Feature> features;
     
     /**
-     * One weight 'vector' for each action/AI I can choose.
-     * Each weight 'vector' is indexed by the corresponding feature name. 
+     * The weight 'vector' is the 'internal' Map from string (feature name) to float (weight value)
+     * There's a weight vector per AI, hence the map from string (AI name) to weight vectors
      */
-    private Map<AI, Map<String, Float>> weights; 
+    private Map<String, Map<String, Float>> weights; 
     
     /**
      * An array of AI's, which are used as 'sub-bots' to play the game.
@@ -41,7 +40,6 @@ public class MetaBot extends AIWithComputationBudget {
     * @param utt
     */
     public MetaBot(UnitTypeTable utt) {
-        super(-1,-1);
         myUnitTypeTable = utt;
         
         //weights are initialized in the first call to {@link #getAction}
@@ -54,10 +52,13 @@ public class MetaBot extends AIWithComputationBudget {
         portfolio.put("HeavyRush", new HeavyRush (utt));
         portfolio.put("Expand", new Expand (utt));
         portfolio.put("BuildBarracks", new BuildBarracks (utt));
-
-
-        
     }
+    
+    /* TODO create a method to initialize the portfolio
+    private MetaBot(UnitTypeTable utt, Map<String, Map<String, Float>> weights){
+    	super(-1, -1);
+    	myUnitTypeTable = utt;
+    }*/
 
     // This will be called by microRTS when it wants to create new instances of this bot (e.g., to play multiple games).
     public AI clone() {
@@ -65,14 +66,35 @@ public class MetaBot extends AIWithComputationBudget {
         return new MetaBot(myUnitTypeTable);
     }
     
-    // This will be called once at the beginning of each new game:    
+    /**
+     * Is called at the beginning of every game. Resets all AIs in the portfolio
+     */
     public void reset() {
+    	for(AI ai : portfolio.values()){
+    		ai.reset();
+    	}
+    	
     }
     
     public void preGameAnalysis(GameState gs, long milliseconds) throws Exception {
     }
 
     public void preGameAnalysis(GameState gs, long milliseconds, String readWriteFolder) throws Exception {
+    	
+    }
+    
+    public void gameOver(int winner) throws Exception {
+    }
+    
+    /**
+     * Resets the portfolio with the new unit type table
+     */
+    public void reset(UnitTypeTable utt) {
+    	myUnitTypeTable = utt;
+    	
+    	for(AI ai : portfolio.values()){
+    		ai.reset(utt);
+    	}
     	
     }
        
