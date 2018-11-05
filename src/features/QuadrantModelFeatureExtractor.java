@@ -2,10 +2,11 @@ package features;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import rts.GameState;
-import rts.PlayerAction;
 import rts.units.Unit;
 import rts.units.UnitType;
 
@@ -74,7 +75,45 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 		}	
 		
 		return features;
+	}
+	
+	/**
+	 * Returns the set of feature names for this model.
+	 * Requires the game state because some features depend on map size
+	 * @param state
+	 * @return
+	 */
+	public Set<String> getFeatureNames(GameState state){
+		Set<String> featureNames = new HashSet<>();
+		
+		// weights are initialized randomly within [-1, 1]
+		featureNames.add(FeatureNames.RESOURCES_OWN);
+		featureNames.add(FeatureNames.RESOURCES_OPP);
+		featureNames.add(FeatureNames.GAME_TIME);
+		featureNames.add(FeatureNames.BIAS);
+		
+		// adds the 'per-quadrant' features 
 
+		// the first two for traverse the quadrants
+		for (int horizQuad = 0; horizQuad < numQuadrants; horizQuad++){
+			for (int vertQuad = 0; vertQuad < numQuadrants; vertQuad++){
+				
+				// the third for traverses the players
+				for(int player = 0; player < 2; player++){
+					String healthFeatName = FeatureNames.avgHealthPerQuad(horizQuad, vertQuad, player);
+					
+					featureNames.add(healthFeatName);
+					
+					// the fourth for traverses the unit types
+					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){
+						String countFeatName = FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, player, type);
+						featureNames.add(countFeatName);
+					}
+				}
+			}
+		}	
+		
+		return featureNames;
 	}
 	
 	public Map<String, Feature> getFeatures(GameState state, int player) {
