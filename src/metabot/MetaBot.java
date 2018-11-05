@@ -5,10 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ai.abstraction.HeavyRush;
+import ai.abstraction.LightRush;
+import ai.abstraction.RangedRush;
+import ai.abstraction.WorkerRush;
 import ai.core.AI;
 import ai.core.AIWithComputationBudget;
 import ai.core.ParameterSpecification;
 import features.Feature;
+import metabot.portfolio.BuildBarracks;
+import metabot.portfolio.Expand;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.units.UnitTypeTable;
@@ -23,18 +29,34 @@ public class MetaBot extends AIWithComputationBudget {
      * Each weight 'vector' is indexed by the corresponding feature name. 
      */
     private Map<AI, Map<String, Float>> weights; 
+    
+    /**
+     * An array of AI's, which are used as 'sub-bots' to play the game.
+     * In our academic wording, this is the portfolio of algorithms that play the game.
+     */
+    private Map<String,AI> portfolio;
 
    /**
-    * Initializes SarsaBot
+    * Initializes MetaBot
     * @param utt
     */
     public MetaBot(UnitTypeTable utt) {
         super(-1,-1);
         myUnitTypeTable = utt;
         
-        //TODO initialize array of weight vectors for each AI in the portfolio
+        //weights are initialized in the first call to {@link #getAction}
+        weights = null;
         
-        weights = new HashMap<>();
+        portfolio = new HashMap<>();
+        portfolio.put("WorkerRush", new WorkerRush (utt));
+        portfolio.put("LightRush", new LightRush (utt));
+        portfolio.put("RangedRush", new RangedRush (utt));
+        portfolio.put("HeavyRush", new HeavyRush (utt));
+        portfolio.put("Expand", new Expand (utt));
+        portfolio.put("BuildBarracks", new BuildBarracks (utt));
+
+
+        
     }
 
     // This will be called by microRTS when it wants to create new instances of this bot (e.g., to play multiple games).
@@ -46,9 +68,14 @@ public class MetaBot extends AIWithComputationBudget {
     // This will be called once at the beginning of each new game:    
     public void reset() {
     }
+    
+    public void preGameAnalysis(GameState gs, long milliseconds) throws Exception {
+    }
+
+    public void preGameAnalysis(GameState gs, long milliseconds, String readWriteFolder) throws Exception {
+    	
+    }
        
-    // Called by microRTS at each game cycle.
-    // Returns the action the bot wants to execute.
     public PlayerAction getAction(int player, GameState gs) {
         PlayerAction pa = new PlayerAction();
         pa.fillWithNones(gs, player, 10);
