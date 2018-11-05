@@ -77,12 +77,6 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 		return features;
 	}
 	
-	/**
-	 * Returns the set of feature names for this model.
-	 * Requires the game state because some features depend on map size
-	 * @param state
-	 * @return
-	 */
 	public Set<String> getFeatureNames(GameState state){
 		Set<String> featureNames = new HashSet<>();
 		
