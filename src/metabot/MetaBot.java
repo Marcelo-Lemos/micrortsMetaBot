@@ -14,34 +14,46 @@ import ai.core.AI;
 import ai.core.ParameterSpecification;
 import features.Feature;
 import features.FeatureExtractor;
-import features.FeatureNames;
 import features.QuadrantModelFeatureExtractor;
 import metabot.portfolio.BuildBarracks;
 import metabot.portfolio.Expand;
 import rts.GameState;
 import rts.PlayerAction;
-import rts.units.UnitType;
 import rts.units.UnitTypeTable;
 
 public class MetaBot extends AI {
     UnitTypeTable myUnitTypeTable = null;
     
     /**
+     * Random number generator
+     */
+    Random random;
+    
+    /**
      * For feature calculation, the map will be divided in numQuadrants x numQuadrants
      */
     int numQuadrants;
     
+    /**
+     * Probability of exploration
+     */
+    float epsilon;
+    
+    /**
+     * Learning rate
+     */
+    float alpha;
+    
+    /**
+     * Eligibility trace
+     */
+    float lambda;
     
     /**
      * Will return the feature values according to state
      */
     private FeatureExtractor featureExtractor;
     
-    
-    /**
-     * Feature 'vector' encoded as a map: feature name -> feature value
-     */
-    private Map<String, Feature> features;
     
     /**
      * The weight 'vector' is the 'internal' Map from string (feature name) to float (weight value)
@@ -62,9 +74,23 @@ public class MetaBot extends AI {
     public MetaBot(UnitTypeTable utt) {
         myUnitTypeTable = utt;
         
+        //TODO customize random seed
+        random = new Random();
+        
+        //TODO customize numQuadrants
+        numQuadrants = 3;
+        
+        //TODO customize epsilon
+        epsilon = 0.1f;
+        
+        //TODO customize alpha
+        alpha = 0.1f;
+        
+        //TODO customize lambda
+        lambda = 0;
+        
         // if we want to use a different featureExtractor, must customize this call
-        //TODO customize numQuadrants 
-        featureExtractor = new QuadrantModelFeatureExtractor(3);
+        featureExtractor = new QuadrantModelFeatureExtractor(numQuadrants);
         
         //weights are initialized in the first call to {@link #getAction} because we require the game map
         weights = null;
@@ -98,7 +124,6 @@ public class MetaBot extends AI {
      * @param gs
      */
     public void initializeWeights(GameState state){
-    	Random random = new Random();
     	weights = new HashMap<>();
     	
     	for(String aiName : portfolio.keySet()){
@@ -137,11 +162,49 @@ public class MetaBot extends AI {
     }
        
     public PlayerAction getAction(int player, GameState state) {
+    	//TODO perform learning
+    	
     	if(weights == null) initializeWeights(state);
     	
-        PlayerAction pa = new PlayerAction();
-        pa.fillWithNones(state, player, 10);
-        return pa;
+    	/**
+         * Feature 'vector' encoded as a map: feature name -> feature value
+         */
+        Map<String, Feature> features = featureExtractor.getFeatures(state, player);
+        
+        AI selected = null;
+        
+        // epsilon-greedy:
+        if(random.nextFloat() < epsilon){ //random choice
+        	//trick to randomly select from HashMap from: https://stackoverflow.com/a/9919827/1251716
+        	Random       random    = new Random();
+        	List<String> keys      = new ArrayList<String>(portfolio.keySet());
+        	String       randomKey = keys.get( random.nextInt(keys.size()) );
+        	selected 			   = portfolio.get(randomKey);
+        }
+        else { //greedy choice
+        	float maxProduct = Float.MIN_VALUE;
+        	
+        	for(String aiName: weights.keySet()){
+        		float product = dotProduct(features, weights.get(aiName));
+        		if (product > maxProduct){
+        			maxProduct = product;
+        			selected = portfolio.get(aiName);
+        		}
+        	}
+        }
+        
+        //now, 'selected' contains the AI that will perform our action, let's try it:
+        try {
+			return selected.getAction(player, state);
+		} catch (Exception e) {
+			System.err.println("Exception while getting action in frame #" + state.getTime() + " from " + selected.getClass().getSimpleName());
+			System.err.println("Defaulting to empyt action");
+			e.printStackTrace();
+			
+			PlayerAction pa = new PlayerAction();
+			pa.fillWithNones(state, player, 1);
+			return pa;
+		}
     }    
     
     public void gameOver(int winner) throws Exception {
@@ -158,5 +221,19 @@ public class MetaBot extends AI {
     public List<ParameterSpecification> getParameters()
     {
         return new ArrayList<>();
+    }
+    
+    /**
+     * Returns the dot product of features and their respective weights 
+     * @param features
+     * @param weights
+     * @return
+     */
+    private float dotProduct(Map<String,Feature> features, Map<String, Float> weights){
+    	float product = 0.0f;
+    	for(String featureName : features.keySet()){
+    		product += features.get(featureName).getValue() * weights.get(featureName);
+    	}
+    	return product;
     }
 }
