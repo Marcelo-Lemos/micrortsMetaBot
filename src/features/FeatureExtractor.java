@@ -8,13 +8,13 @@ import rts.GameState;
 public abstract class FeatureExtractor {
 	
 	/**
-	 * Returns the features associated with a {@link GameState} from the point
+	 * Returns the features (without normalizing) associated with a {@link GameState} from the point
 	 * of view of a player (0 or 1)
 	 * @param state
 	 * @param player
 	 * @return
 	 */
-	public abstract Map<String, Feature> getFeatures(GameState state, int player); 
+	public abstract Map<String, Feature> getRawFeatures(GameState state, int player); 
 	
 	/**
 	 * Returns the set of feature names for this model.
@@ -35,8 +35,8 @@ public abstract class FeatureExtractor {
 	 * @param player
 	 * @return
 	 */
-	public Map<String, Feature> getNormalizedFeatures(GameState state, int player) {
-		Map<String, Feature> features = getFeatures(state, player);
+	public Map<String, Feature> getFeatures(GameState state, int player) {
+		Map<String, Feature> features = getRawFeatures(state, player);
 		
         for(Feature f: features.values()){
         	f.minMaxScaling();

@@ -110,7 +110,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 		return featureNames;
 	}
 	
-	public Map<String, Feature> getFeatures(GameState state, int player) {
+	public Map<String, Feature> getRawFeatures(GameState state, int player) {
         
 		// receives the features with no values yet (their max and min are initialized, though)
 		Map<String, Feature> features = initializeFeatures(state);
