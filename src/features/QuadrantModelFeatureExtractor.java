@@ -24,7 +24,7 @@ import rts.units.UnitType;
 public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 	int numQuadrants;
 	
-	public QuadrantModelFeatureExtractor(int numQuadrants, int maxGameTime){
+	public QuadrantModelFeatureExtractor(int numQuadrants){
 		this.numQuadrants = numQuadrants;
 		
 	}
