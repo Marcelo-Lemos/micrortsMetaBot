@@ -45,6 +45,11 @@ public class MetaBot extends AI {
     float alpha;
     
     /**
+     * Discount factor
+     */
+    float gamma;
+    
+    /**
      * Eligibility trace
      */
     float lambda;
@@ -53,6 +58,10 @@ public class MetaBot extends AI {
      * Will return the feature values according to state
      */
     private FeatureExtractor featureExtractor;
+    
+    //--- variables to perform SARSA weight update:
+    GameState state, prevState;	//state and previous state (rather than nextState and state)
+    String choice, prevChoice; //choice and previous choice (rather than nextChoice and choice)
     
     
     /**
@@ -74,6 +83,9 @@ public class MetaBot extends AI {
     public MetaBot(UnitTypeTable utt) {
         myUnitTypeTable = utt;
         
+        state = prevState = null;
+        choice = prevChoice = null;
+        
         //TODO customize random seed
         random = new Random();
         
@@ -85,6 +97,9 @@ public class MetaBot extends AI {
         
         //TODO customize alpha
         alpha = 0.1f;
+        
+        //TODO customize gamma
+        gamma = 0.9f;
         
         //TODO customize lambda
         lambda = 0;
@@ -161,48 +176,64 @@ public class MetaBot extends AI {
     	
     }
        
-    public PlayerAction getAction(int player, GameState state) {
-    	//TODO perform learning
+    public PlayerAction getAction(int player, GameState gameState) {
+    	//initializes weights on first frame
+    	if(weights == null) initializeWeights(gameState);
     	
-    	if(weights == null) initializeWeights(state);
+    	// perceives the current state (will be used in learning)
+    	prevState = state;
+    	state = gameState;
+    	prevChoice = choice;
     	
     	/**
          * Feature 'vector' encoded as a map: feature name -> feature value
          */
         Map<String, Feature> features = featureExtractor.getFeatures(state, player);
         
-        AI selected = null;
+        // will choose the action for this state
+        choice = null;
         
         // epsilon-greedy:
         if(random.nextFloat() < epsilon){ //random choice
-        	//trick to randomly select from HashMap from: https://stackoverflow.com/a/9919827/1251716
-        	Random       random    = new Random();
-        	List<String> keys      = new ArrayList<String>(portfolio.keySet());
-        	String       randomKey = keys.get( random.nextInt(keys.size()) );
-        	selected 			   = portfolio.get(randomKey);
+        	//trick to randomly select from HashMap adapted from: https://stackoverflow.com/a/9919827/1251716
+        	List<String> keys = new ArrayList<String>(portfolio.keySet());
+        	choice = keys.get(random.nextInt(keys.size()));
         }
         else { //greedy choice
-        	float maxProduct = Float.MIN_VALUE;
+        	float maxQ = Float.MIN_VALUE;
         	
         	for(String aiName: weights.keySet()){
-        		float product = dotProduct(features, weights.get(aiName));
-        		if (product > maxProduct){
-        			maxProduct = product;
-        			selected = portfolio.get(aiName);
+        		float q = qValue(features, aiName);
+        		if (q > maxQ){
+        			maxQ = q;
+        			choice = aiName;
         		}
         	}
         }
+        // learning (i.e. weight vector update)
+        // reward is zero for all states but terminals
+        float reward = 0;
+        if (state.gameover()){
+        	if(state.winner() == player) reward = 1;
+        	if(state.winner() == 1-player) reward = -1;
+        	else reward = 0; //draw (added here to make it explicit)
+        }
+        // uses sarsa to update the weights regarding the PREVIOUS state and choice
+        // this is necessary because sarsa needs the 'future' state and choice which I got to know now
+        sarsaLearning(prevState, prevChoice, reward, state, choice, player);
+        
         
         //now, 'selected' contains the AI that will perform our action, let's try it:
         try {
-			return selected.getAction(player, state);
+        	AI selected = portfolio.get(choice);
+			return selected.getAction(player, gameState);
 		} catch (Exception e) {
-			System.err.println("Exception while getting action in frame #" + state.getTime() + " from " + selected.getClass().getSimpleName());
+			System.err.println("Exception while getting action in frame #" + gameState.getTime() + " from " + choice);
 			System.err.println("Defaulting to empyt action");
 			e.printStackTrace();
 			
 			PlayerAction pa = new PlayerAction();
-			pa.fillWithNones(state, player, 1);
+			pa.fillWithNones(gameState, player, 1);
 			return pa;
 		}
     }    
@@ -213,6 +244,38 @@ public class MetaBot extends AI {
     public AI clone() {
     	//TODO copy features and weights
         return new MetaBot(myUnitTypeTable);
+    }
+    
+    /**
+     * Updates the weight vector of the current action (choice) using the Sarsa rule
+     * 
+     * @param state s in Sarsa equation
+     * @param choice a in Sarsa equation
+     * @param reward r in Sarsa equation
+     * @param nextState s' in Sarsa equation
+     * @param nextChoice a' in Sarsa equation
+     * @param player required to extract the features for the states
+     */
+    private void sarsaLearning(GameState state, String choice, float reward, GameState nextState, String nextChoice, int player){
+    	// checks if s' and a' are ok (s and a will always be ok, we hope)
+    	if(nextState == null || nextChoice == null) return;
+    	
+    	Map<String, Feature> stateFeatures = featureExtractor.getFeatures(state, player);
+    	Map<String, Feature> nextStateFeatures = featureExtractor.getFeatures(nextState, player);
+    	
+    	float q = qValue(stateFeatures, choice);
+    	float futureQ = qValue(nextStateFeatures, nextChoice);
+    	
+    	//delta in Sarsa equation
+    	float tdError = reward + gamma * futureQ - q;
+    	
+    	for(String featureName : stateFeatures.keySet()){
+    		//retrieves the weight value, updates it and stores the updated value
+    		float weightValue = weights.get(choice).get(featureName);
+    		weightValue += alpha * tdError * stateFeatures.get(featureName).getValue();
+    		weights.get(choice).put(featureName, weightValue);
+    	}
+    	
     }
     
     // This will be called by the microRTS GUI to get the
@@ -235,5 +298,15 @@ public class MetaBot extends AI {
     		product += features.get(featureName).getValue() * weights.get(featureName);
     	}
     	return product;
+    }
+    
+    /**
+     * Returns the Q-value of a choice, for a given set of features
+     * @param features
+     * @param choice
+     * @return
+     */
+    private float qValue(Map<String,Feature> features, String choice){
+    	return dotProduct(features, weights.get(choice));
     }
 }
