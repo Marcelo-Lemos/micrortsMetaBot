@@ -2,8 +2,10 @@ package test;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.Set;
 
+import org.jdom.JDOMException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,7 +45,13 @@ public class TestQuadrantModelFeatureExtractor {
 		 * --- p is in the set {0, 1} (player index)
 		 */
 		UnitTypeTable types = new UnitTypeTable(UnitTypeTable.VERSION_ORIGINAL_FINETUNED);
-		GameState state = new GameState(PhysicalGameState.load("basesWorkers24x24.xml", types),types);
+		GameState state = null;
+		try {
+			state = new GameState(PhysicalGameState.load("basesWorkers24x24.xml", types),types);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Failed to load game state");
+		}
 		
 		QuadrantModelFeatureExtractor featureExtractor = new QuadrantModelFeatureExtractor(3);
 		
