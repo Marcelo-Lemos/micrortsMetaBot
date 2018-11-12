@@ -193,7 +193,7 @@ public class Sarsa {
         }
         // uses sarsa to update the weights for the PREVIOUS state and choice
         // using current state and choice as Sarsa's future ones
-        sarsaLearning(prevState, prevChoice, reward, state, choice, player);
+        learn(prevState, prevChoice, reward, state, choice, player);
         
         return portfolio.get(choice);
     }
@@ -210,7 +210,7 @@ public class Sarsa {
      * @param nextChoice a' in Sarsa equation
      * @param player required to extract the features for the states
      */
-    private void sarsaLearning(GameState state, String choice, float reward, GameState nextState, String nextChoice, int player){
+    public void learn(GameState state, String choice, float reward, GameState nextState, String nextChoice, int player){
     	// checks if s' and a' are ok (s and a will always be ok, we hope)
     	if(nextState == null || nextChoice == null) return;
     	
