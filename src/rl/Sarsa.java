@@ -143,8 +143,7 @@ public class Sarsa {
      * @return
      */
     public AI act(GameState state, int player){
-    	//nextChoice on the first call to this function, afterwards, 
-    	// it is determined as a side-effect of 'learn'
+    	//nextChoice is null on the first call to this function, afterwards, it is determined as a side-effect of 'learn'
     	if(nextChoice == null){
     		nextChoice = epsilonGreedy(state, player);
     	}

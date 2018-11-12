@@ -126,6 +126,7 @@ public class MetaBot extends AI {
     
     /**
      * Is called at the beginning of every game. Resets all AIs in the portfolio
+     * and my internal variables.
      */
     public void reset() {
     	for(AI ai : portfolio.values()){
