@@ -1,10 +1,15 @@
 package rl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import ai.core.AI;
 import features.Feature;
@@ -12,6 +17,14 @@ import features.FeatureExtractor;
 import features.QuadrantModelFeatureExtractor;
 import rts.GameState;
 
+/**
+ * Implements Sarsa(0)
+ * 
+ * TODO implement Sarsa(lambda)
+ * TODO make its interface more gym-like
+ * @author anderson
+ *
+ */
 public class Sarsa {
 	/**
      * Random number generator
@@ -19,29 +32,39 @@ public class Sarsa {
     Random random;
     
     /**
-     * For feature calculation, the map will be divided in numQuadrants x numQuadrants
+     * For feature calculation, the map will be divided in quadrantDivision x quadrantDivision
      */
-    private int numQuadrants;
+    private int quadrantDivision;
     
     /**
      * Probability of exploration
      */
-    private float epsilon;
+    private double epsilon;
+    
+    /**
+     * Decay rate of epsilon
+     */
+    private double epsilonDecayRate;
     
     /**
      * Learning rate
      */
-    private float alpha;
+    private double alpha;
+    
+    /**
+     * Decay rate of alpha
+     */
+    private double alphaDecayRate;
     
     /**
      * Discount factor
      */
-    private float gamma;
+    private double gamma;
     
     /**
      * Eligibility trace
      */
-    private float lambda;
+    private double lambda;
     
     /**
      * Will return the feature values according to state
@@ -69,26 +92,34 @@ public class Sarsa {
     	state = prevState = null;
         choice = prevChoice = null;
         
-        //TODO customize random seed
-        random = new Random();
+        Configurations configs = new Configurations();
+        try {
+            Configuration config = configs.properties(new File("sarsa.properties"));
+            
+            //TODO customize random seed
+            random = new Random(config.getInt("random.seed"));
+            
+            epsilon = config.getDouble("epsilon.initial", 0.1);
+            epsilonDecayRate = config.getDouble("epsilon.decay", 1.0);
+            
+            alpha = config.getDouble("alpha.initial", 0.1);
+            alphaDecayRate = config.getDouble("alpha.decay", 1.0);
+            
+            gamma = config.getDouble("gamma", 0.9);
+            
+            lambda = config.getDouble("lambda", 0.0);
+            
+            quadrantDivision = config.getInt("feature.extractor.quadrant_division", 3);
+            
+            // if we want to use a different featureExtractor, must customize this call
+            featureExtractor = new QuadrantModelFeatureExtractor(quadrantDivision);
+            
+        }
+        catch (ConfigurationException cex) {
+            // Something went wrong
+        }
         
-        //TODO customize numQuadrants
-        numQuadrants = 3;
         
-        //TODO customize epsilon
-        epsilon = 0.1f;
-        
-        //TODO customize alpha
-        alpha = 0.1f;
-        
-        //TODO customize gamma
-        gamma = 0.9f;
-        
-        //TODO customize lambda
-        lambda = 0;
-        
-        // if we want to use a different featureExtractor, must customize this call
-        featureExtractor = new QuadrantModelFeatureExtractor(numQuadrants);
         
         //weights are initialized in the first call to {@link #getAction} because we require the game map
         weights = null;
@@ -165,6 +196,11 @@ public class Sarsa {
         	if(state.winner() == player) reward = 1;
         	if(state.winner() == 1-player) reward = -1;
         	else reward = 0; //draw (added here to make it explicit)
+        	
+        	//decays alpha and epsilon
+        	alpha *= alphaDecayRate;
+        	epsilon *= epsilonDecayRate;
+        	
         }
         // uses sarsa to update the weights for the PREVIOUS state and choice
         // using current state and choice as Sarsa's future ones
@@ -196,7 +232,7 @@ public class Sarsa {
     	float futureQ = qValue(nextStateFeatures, nextChoice);
     	
     	//the temporal-difference error (delta in Sarsa equation)
-    	float delta = reward + gamma * futureQ - q;
+    	double delta = reward + gamma * futureQ - q;
     	
     	for(String featureName : stateFeatures.keySet()){
     		//retrieves the weight value, updates it and stores the updated value
@@ -204,7 +240,6 @@ public class Sarsa {
     		weightValue += alpha * delta * stateFeatures.get(featureName).getValue();
     		weights.get(choice).put(featureName, weightValue);
     	}
-    	
     }
     
     /**
