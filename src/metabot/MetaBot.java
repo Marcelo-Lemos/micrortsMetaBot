@@ -32,6 +32,15 @@ public class MetaBot extends AI {
     
     private Sarsa learningAgent;
     
+    int myPlayerNumber;
+    
+    // BEGIN -- variables to feed the learning agent
+    private GameState previousState;
+    private GameState currentState;
+    private AI choice;
+    double reward;
+    // END-- variables to feed the learning agent
+    
 
    /**
     * Initializes MetaBot with default configurations
@@ -89,6 +98,8 @@ public class MetaBot extends AI {
         // creates the learning agent with the specified portfolio
         //TODO customize by loading according to rl.agent in config
         learningAgent = new Sarsa(portfolio);
+        
+        reset();
     }
     
     
@@ -109,6 +120,8 @@ public class MetaBot extends AI {
     		ai.reset(utt);
     	}
     	
+    	reset();
+    	
     }
     
     /**
@@ -119,31 +132,64 @@ public class MetaBot extends AI {
     		ai.reset();
     	}
     	
+    	choice = null;
+    	previousState = null;
+    	currentState = null;
+    	myPlayerNumber = -1;
+    	
     }
        
-    public PlayerAction getAction(int player, GameState gameState) {
+    public PlayerAction getAction(int player, GameState state) {
+    	
+    	// sets to a valid number on the first call
+    	if(myPlayerNumber == -1){
+    		myPlayerNumber = player;
+    	}
+    	
+    	// verifies if the number I set previously holds
+    	if(myPlayerNumber != player){
+    		throw new RuntimeException(
+				"Called with wrong player number " + player + ". Was expecting: " + myPlayerNumber
+			);
+    	}
+    	
+    	// makes the learning agent learn
+    	previousState = currentState;
+    	currentState = state;
+    	reward = 0;
+        if (state.gameover()){
+        	if(state.winner() == player) reward = 1;
+        	if(state.winner() == 1-player) reward = -1;
+        	else reward = 0;
+        }
+        learningAgent.learn(previousState, choice, reward, currentState, false, player);
     	
         // selected is the AI that will perform our action, let's try it:
-    	AI selected = learningAgent.act(gameState, player);
+    	choice = learningAgent.act(state, player);
     	
         try {
-			return selected.getAction(player, gameState);
+			return choice.getAction(player, state);
 		} catch (Exception e) {
-			System.err.println("Exception while getting action in frame #" + gameState.getTime() + " from " + selected.getClass().getSimpleName());
+			System.err.println("Exception while getting action in frame #" + state.getTime() + " from " + choice.getClass().getSimpleName());
 			System.err.println("Defaulting to empyt action");
 			e.printStackTrace();
 			
 			PlayerAction pa = new PlayerAction();
-			pa.fillWithNones(gameState, player, 1);
+			pa.fillWithNones(state, player, 1);
 			return pa;
 		}
     }    
     
     public void gameOver(int winner) throws Exception {
+    	if (winner == -1) reward = 0; //game not finished (timeout) or draw
+    	else if (winner == myPlayerNumber) reward = 1; //I won
+    	else reward = -1; //I lost
+    	
+    	learningAgent.learn(previousState, choice, reward, currentState, true, myPlayerNumber);
     }
     
     public AI clone() {
-    	//TODO copy features and weights
+    	//FIXME copy features, weights and other attributes!
         return new MetaBot(myUnitTypeTable);
     }
     
