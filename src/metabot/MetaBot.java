@@ -34,17 +34,27 @@ public class MetaBot extends AI {
     
 
    /**
-    * Initializes MetaBot
+    * Initializes MetaBot with default configurations
     * @param utt
     */
     public MetaBot(UnitTypeTable utt) {
-        myUnitTypeTable = utt;
+    	// calls the other constructor, specifying the default config file
+    	this(utt, "metabot.properties");
+    }
+    
+    /**
+     * Initializes MetaBot, loading the configurations from the specified file
+     * @param utt
+     * @param configPath
+     */
+    public MetaBot(UnitTypeTable utt, String configPath){
+    	myUnitTypeTable = utt;
         
         // loads the configuration
         //TODO customize config. file
-        Configuration config = ConfigLoader.loadConfig("metabot.properties");
+        Configuration config = ConfigLoader.loadConfig(configPath);
         
-        List<Object> memberList = config.getList("portfolio");
+        List<Object> memberList = config.getList("portfolio.member");
         
         //loads the portfolio according to the file specification
         portfolio = new HashMap<>();
@@ -77,6 +87,7 @@ public class MetaBot extends AI {
         }
         
         // creates the learning agent with the specified portfolio
+        //TODO customize by loading according to rl.agent in config
         learningAgent = new Sarsa(portfolio);
     }
     
