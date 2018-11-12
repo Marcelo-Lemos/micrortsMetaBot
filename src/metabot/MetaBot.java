@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+
+import org.apache.commons.configuration2.Configuration;
 
 import ai.abstraction.HeavyRush;
 import ai.abstraction.LightRush;
@@ -12,9 +13,7 @@ import ai.abstraction.RangedRush;
 import ai.abstraction.WorkerRush;
 import ai.core.AI;
 import ai.core.ParameterSpecification;
-import features.Feature;
-import features.FeatureExtractor;
-import features.QuadrantModelFeatureExtractor;
+import config.ConfigLoader;
 import metabot.portfolio.BuildBarracks;
 import metabot.portfolio.Expand;
 import rl.Sarsa;
@@ -41,14 +40,43 @@ public class MetaBot extends AI {
     public MetaBot(UnitTypeTable utt) {
         myUnitTypeTable = utt;
         
-        portfolio = new HashMap<>();
-        portfolio.put("WorkerRush", new WorkerRush (utt));
-        portfolio.put("LightRush", new LightRush (utt));
-        portfolio.put("RangedRush", new RangedRush (utt));
-        portfolio.put("HeavyRush", new HeavyRush (utt));
-        portfolio.put("Expand", new Expand (utt));
-        portfolio.put("BuildBarracks", new BuildBarracks (utt));
+        // loads the configuration
+        //TODO customize config. file
+        Configuration config = ConfigLoader.loadConfig("metabot.properties");
         
+        List<Object> memberList = config.getList("portfolio");
+        
+        //loads the portfolio according to the file specification
+        portfolio = new HashMap<>();
+        
+        //TODO get rid of this for-switch and do something like https://stackoverflow.com/a/6094609/1251716
+        for(Object nameObj : memberList ){
+        	String name = (String) nameObj;
+        	
+        	if(name.equalsIgnoreCase("WorkerRush")){
+        		portfolio.put("WorkerRush", new WorkerRush (utt));
+        	}
+        	else if(name.equalsIgnoreCase("LightRush")){
+        		portfolio.put("LightRush", new LightRush (utt));
+        	}
+        	else if(name.equalsIgnoreCase("RangedRush")){
+        		portfolio.put("RangedRush", new RangedRush (utt));
+        	}
+        	else if(name.equalsIgnoreCase("HeavyRush")){
+        		portfolio.put("HeavyRush", new HeavyRush (utt));
+        	}
+        	else if(name.equalsIgnoreCase("Expand")){
+        		portfolio.put("Expand", new Expand (utt));
+        	}
+        	else if(name.equalsIgnoreCase("BuildBarracks")){
+        		portfolio.put("BuildBarracks", new BuildBarracks (utt));
+        	}
+        	
+        	else throw new RuntimeException("Unknown portfolio member " + name);
+        	
+        }
+        
+        // creates the learning agent with the specified portfolio
         learningAgent = new Sarsa(portfolio);
     }
     
