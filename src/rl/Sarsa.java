@@ -1,6 +1,5 @@
 package rl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,10 +7,9 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import ai.core.AI;
+import config.ConfigLoader;
 import features.Feature;
 import features.FeatureExtractor;
 import features.QuadrantModelFeatureExtractor;
@@ -92,35 +90,25 @@ public class Sarsa {
     	state = prevState = null;
         choice = prevChoice = null;
         
-        Configurations configs = new Configurations();
-        try {
-            Configuration config = configs.properties(new File("sarsa.properties"));
-            
-            //TODO customize random seed
-            random = new Random(config.getInt("random.seed"));
-            
-            epsilon = config.getDouble("epsilon.initial", 0.1);
-            epsilonDecayRate = config.getDouble("epsilon.decay", 1.0);
-            
-            alpha = config.getDouble("alpha.initial", 0.1);
-            alphaDecayRate = config.getDouble("alpha.decay", 1.0);
-            
-            gamma = config.getDouble("gamma", 0.9);
-            
-            lambda = config.getDouble("lambda", 0.0);
-            
-            quadrantDivision = config.getInt("feature.extractor.quadrant_division", 3);
-            
-            // if we want to use a different featureExtractor, must customize this call
-            featureExtractor = new QuadrantModelFeatureExtractor(quadrantDivision);
-            
-        }
-        catch (ConfigurationException cex) {
-            // Something went wrong
-        }
+        Configuration config = ConfigLoader.getConfiguration();
         
+        random = new Random(config.getInt("rl.random.seed"));
         
+        epsilon = config.getDouble("rl.epsilon.initial", 0.1);
+        epsilonDecayRate = config.getDouble("rl.epsilon.decay", 1.0);
         
+        alpha = config.getDouble("rl.alpha.initial", 0.1);
+        alphaDecayRate = config.getDouble("rl.alpha.decay", 1.0);
+        
+        gamma = config.getDouble("rl.gamma", 0.9);
+        
+        lambda = config.getDouble("rl.lambda", 0.0);
+        
+        quadrantDivision = config.getInt("rl.feature.extractor.quadrant_division", 3);
+        
+        // if we want to use a different featureExtractor, must customize this call
+        featureExtractor = new QuadrantModelFeatureExtractor(quadrantDivision);
+            
         //weights are initialized in the first call to {@link #getAction} because we require the game map
         weights = null;
         
