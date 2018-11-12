@@ -20,6 +20,7 @@ import rts.GameState;
  * 
  * TODO implement Sarsa(lambda)
  * TODO make its interface more gym-like
+ * TODO allow loading and saving of weights
  * @author anderson
  *
  */
