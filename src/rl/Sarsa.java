@@ -1,5 +1,12 @@
 package rl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -280,5 +287,44 @@ public class Sarsa {
      */
     private float qValue(Map<String,Feature> features, String choice){
     	return dotProduct(features, weights.get(choice));
+    }
+    
+    /**
+     * Saves the weight 'vector' to a file in the specified path
+     * by serializing the weights HashMap.
+     * The file is overridden if already exists.
+     * @param path
+     * @throws IOException
+     */
+    public void save(String path) throws IOException{
+    	if(weights == null){
+    		throw new RuntimeException("Attempted to save non-initialized weights");
+    	}
+    	
+    	FileOutputStream fos = new FileOutputStream(path);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(weights);
+        oos.close();
+        fos.close();
+    }
+    
+    /**
+     * Loads the weight 'vector' from a file in the specified path
+     * by de-serializing the weights HashMap
+     * @param path
+     * @throws IOException
+     */
+    @SuppressWarnings("unchecked")
+	public void load(String path) throws IOException{
+    	FileInputStream fis = new FileInputStream(path);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        try {
+			weights = (HashMap<String, Map<String, Float>>) ois.readObject();
+		} catch (ClassNotFoundException e) {
+			System.err.println("Error while attempting to load weights.");
+			e.printStackTrace();
+		}
+        ois.close();
+        fis.close();
     }
 }
