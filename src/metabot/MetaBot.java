@@ -163,7 +163,7 @@ public class MetaBot extends AI {
         	if(state.winner() == 1-player) reward = -1;
         	else reward = 0;
         }
-        learningAgent.learn(previousState, choice, reward, currentState, false, player);
+        learningAgent.learn(previousState, choice, reward, currentState, state.gameover(), player);
     	
         // selected is the AI that will perform our action, let's try it:
     	choice = learningAgent.act(state, player);
@@ -172,7 +172,7 @@ public class MetaBot extends AI {
 			return choice.getAction(player, state);
 		} catch (Exception e) {
 			System.err.println("Exception while getting action in frame #" + state.getTime() + " from " + choice.getClass().getSimpleName());
-			System.err.println("Defaulting to empyt action");
+			System.err.println("Defaulting to empty action");
 			e.printStackTrace();
 			
 			PlayerAction pa = new PlayerAction();
