@@ -158,7 +158,7 @@ public class Sarsa {
      * @param player
      * @return
      */
-    public AI epsilonGreedy(GameState state, int player){
+    private AI epsilonGreedy(GameState state, int player){
     	//initializes weights on first frame
     	if(weights == null) initializeWeights(state);
     	
