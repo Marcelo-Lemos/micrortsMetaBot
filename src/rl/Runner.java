@@ -24,7 +24,13 @@ public class Runner {
 
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
-        InputStream is = new FileInputStream(args[1]);
+		InputStream is;
+		if(args.length > 1){
+			is = new FileInputStream(args[1]);
+		}
+		else {
+			is = new FileInputStream("config/microrts.properties");
+		}
         prop.load(is);
 		GameSettings settings = GameSettings.loadFromConfig(prop);
 		System.out.println(settings);
