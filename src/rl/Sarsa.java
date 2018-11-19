@@ -1,9 +1,7 @@
 package rl;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -182,10 +180,10 @@ public class Sarsa {
         	choiceName = keys.get(random.nextInt(keys.size()));
         }
         else { //greedy choice
-        	float maxQ = Float.MIN_VALUE;
+        	double maxQ = Double.MIN_VALUE;
         	
         	for(String aiName: weights.keySet()){
-        		float q = qValue(features, aiName);
+        		double q = qValue(features, aiName);
         		if (q > maxQ){
         			maxQ = q;
         			choiceName = aiName;
@@ -251,8 +249,8 @@ public class Sarsa {
     	Map<String, Feature> stateFeatures = featureExtractor.getFeatures(state, player);
     	Map<String, Feature> nextStateFeatures = featureExtractor.getFeatures(nextState, player);
     	
-    	float q = qValue(stateFeatures, choice);
-    	float futureQ = qValue(nextStateFeatures, nextChoice);
+    	double q = qValue(stateFeatures, choice);
+    	double futureQ = qValue(nextStateFeatures, nextChoice);
     	
     	//the temporal-difference error (delta in Sarsa equation)
     	double delta = reward + gamma * futureQ - q;
@@ -271,7 +269,7 @@ public class Sarsa {
      * @param weights
      * @return
      */
-    private float dotProduct(Map<String,Feature> features, Map<String, Float> weights){
+    private double dotProduct(Map<String,Feature> features, Map<String, Float> weights){
     	float product = 0.0f;
     	for(String featureName : features.keySet()){
     		product += features.get(featureName).getValue() * weights.get(featureName);
@@ -285,8 +283,19 @@ public class Sarsa {
      * @param choice
      * @return
      */
-    private float qValue(Map<String,Feature> features, String choice){
+    private double qValue(Map<String,Feature> features, String choice){
     	return dotProduct(features, weights.get(choice));
+    }
+    
+    /**
+     * Returns the Q-value of a state (including player information) and choice (action)
+     * @param state
+     * @param player
+     * @param choice
+     * @return
+     */
+    private double qValue(GameState state, int player, String choice){
+    	return qValue(featureExtractor.getFeatures(state, player), choice);
     }
     
     /**
@@ -327,4 +336,6 @@ public class Sarsa {
         ois.close();
         fis.close();
     }
+    
 }
+
