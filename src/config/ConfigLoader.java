@@ -1,10 +1,12 @@
 package config;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
+import rts.GameSettings;
 
 /**
  * Emulates a singleton version of {@link Configuration}.
@@ -13,7 +15,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
  */
 public class ConfigLoader {
 	
-	private static Configuration configInstance;
+	private static Properties configInstance;
 	
 	/**
 	 * Hidden constructor (cannot instantiate)
@@ -26,7 +28,7 @@ public class ConfigLoader {
 	 * Returns the Configuration object. loadConfig must have been called prior to this method.
 	 * @return
 	 */
-	public static Configuration getConfiguration(){
+	public static Properties getConfiguration(){
 		if(configInstance == null){
 			throw new RuntimeException("Must load config before getting the config instance.");
 		}
@@ -39,17 +41,13 @@ public class ConfigLoader {
 	 * Configuration object.
 	 * @param path
 	 * @return
+	 * @throws IOException 
 	 */
-	public static Configuration loadConfig(String path){
-		Configurations configs = new Configurations();
-        try {
-        	configInstance = configs.properties(new File(path));
-        }
-        catch (ConfigurationException cex) {
-            System.err.println("Error while loading configuration " + path);
-            cex.printStackTrace();
-        }
-        
+	public static Properties loadConfig(String path) throws IOException{
+		configInstance = new Properties();
+		InputStream is = new FileInputStream(path);
+		configInstance.load(is);
+		is.close();
         return configInstance;
 	}
 }

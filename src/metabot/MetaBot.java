@@ -1,11 +1,11 @@
 package metabot;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.configuration2.Configuration;
+import java.util.Properties;
 
 import ai.abstraction.HeavyRush;
 import ai.abstraction.LightRush;
@@ -60,16 +60,25 @@ public class MetaBot extends AI {
     	myUnitTypeTable = utt;
         
         // loads the configuration
-        //TODO customize config. file
-        Configuration config = ConfigLoader.loadConfig(configPath);
+        Properties config = null;
+        String members;
+		try {
+			config = ConfigLoader.loadConfig(configPath);
+			members = config.getProperty("portfolio.members");
+		} catch (IOException e) {
+			System.err.println("Error while loading configuration from " + configPath+ ". Using defaults.");
+			e.printStackTrace();
+			
+			members = "WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks";
+		}
         
-        List<Object> memberList = config.getList("portfolio.member");
+        String[] memberNames = members.split(",");
         
         //loads the portfolio according to the file specification
         portfolio = new HashMap<>();
         
         //TODO get rid of this for-switch and do something like https://stackoverflow.com/a/6094609/1251716
-        for(Object nameObj : memberList ){
+        for(Object nameObj : memberNames ){
         	String name = (String) nameObj;
         	
         	if(name.equalsIgnoreCase("WorkerRush")){
@@ -91,7 +100,7 @@ public class MetaBot extends AI {
         		portfolio.put("BuildBarracks", new BuildBarracks (utt));
         	}
         	
-        	else throw new RuntimeException("Unknown portfolio member " + name);
+        	else throw new RuntimeException("Unknown portfolio member '" + name +"'");
         	
         }
         

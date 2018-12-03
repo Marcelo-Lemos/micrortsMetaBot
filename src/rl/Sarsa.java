@@ -9,9 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
-
-import org.apache.commons.configuration2.Configuration;
 
 import ai.core.AI;
 import config.ConfigLoader;
@@ -95,21 +94,21 @@ public class Sarsa {
     
     public Sarsa(Map<String,AI> portfolio){
         
-        Configuration config = ConfigLoader.getConfiguration();
+    	Properties config = ConfigLoader.getConfiguration();
         
-        random = new Random(config.getInt("rl.random.seed"));
+        random = new Random(Integer.parseInt(config.getProperty("rl.random.seed")));
         
-        epsilon = config.getDouble("rl.epsilon.initial", 0.1);
-        epsilonDecayRate = config.getDouble("rl.epsilon.decay", 1.0);
+        epsilon = Double.parseDouble(config.getProperty("rl.epsilon.initial", "0.1"));
+        epsilonDecayRate = Double.parseDouble(config.getProperty("rl.epsilon.decay", "1.0"));
         
-        alpha = config.getDouble("rl.alpha.initial", 0.1);
-        alphaDecayRate = config.getDouble("rl.alpha.decay", 1.0);
+        alpha = Double.parseDouble(config.getProperty("rl.alpha.initial", "0.1"));
+        alphaDecayRate = Double.parseDouble(config.getProperty("rl.alpha.decay", "1.0"));
         
-        gamma = config.getDouble("rl.gamma", 0.9);
+        gamma = Double.parseDouble(config.getProperty("rl.gamma", "0.9"));
         
-        lambda = config.getDouble("rl.lambda", 0.0);
+        lambda = Double.parseDouble(config.getProperty("rl.lambda", "0.0"));
         
-        quadrantDivision = config.getInt("rl.feature.extractor.quadrant_division", 3);
+        quadrantDivision = Integer.parseInt(config.getProperty("rl.feature.extractor.quadrant_division", "3"));
         
         // if we want to use a different featureExtractor, must customize this call
         featureExtractor = new QuadrantModelFeatureExtractor(quadrantDivision);
@@ -328,7 +327,7 @@ public class Sarsa {
     	FileInputStream fis = new FileInputStream(path);
         ObjectInputStream ois = new ObjectInputStream(fis);
         try {
-			weights = (HashMap<String, Map<String, Float>>) ois.readObject();
+			weights = (Map<String, Map<String, Float>>) ois.readObject();
 		} catch (ClassNotFoundException e) {
 			System.err.println("Error while attempting to load weights.");
 			e.printStackTrace();

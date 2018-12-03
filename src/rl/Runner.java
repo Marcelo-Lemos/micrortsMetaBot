@@ -101,8 +101,8 @@ public class Runner {
 		AI ai;
 		
 		// (custom) loads MetaBot with its configuration file
-		if(aiName.equalsIgnoreCase("MetaBot")) {
-			if(properties.contains("metabot.config")){
+		if(aiName.equalsIgnoreCase("metabot.MetaBot")) {
+			if(properties.containsKey("metabot.config")){
 				ai = new MetaBot(utt, properties.getProperty("metabot.config"));
 			}
 			else {
