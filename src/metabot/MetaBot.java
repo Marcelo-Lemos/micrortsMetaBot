@@ -78,8 +78,8 @@ public class MetaBot extends AI {
         portfolio = new HashMap<>();
         
         //TODO get rid of this for-switch and do something like https://stackoverflow.com/a/6094609/1251716
-        for(Object nameObj : memberNames ){
-        	String name = (String) nameObj;
+        for(String name : memberNames ){
+        	name = name.trim();
         	
         	if(name.equalsIgnoreCase("WorkerRush")){
         		portfolio.put("WorkerRush", new WorkerRush (utt));
