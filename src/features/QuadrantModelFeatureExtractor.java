@@ -67,7 +67,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 					
 					// the fourth for traverses the unit types
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){
-						String countFeatName = FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, player, type);
+						String countFeatName = FeatureNames.unitsOfTypePerQuad(horizQuad, vertQuad, player, type);
 						features.put(countFeatName, new Feature(countFeatName, 0, 0, tilesPerQuadrant));
 					}
 				}
@@ -100,7 +100,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 					
 					// the fourth for traverses the unit types
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){
-						String countFeatName = FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, player, type);
+						String countFeatName = FeatureNames.unitsOfTypePerQuad(horizQuad, vertQuad, player, type);
 						featureNames.add(countFeatName);
 					}
 				}
@@ -157,8 +157,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 					unitCount[u.getPlayer()]++;
 					hpSum[u.getPlayer()] += u.getHitPoints();
 
-					//TODO rename method to typeCountPerQuad
-					String name = FeatureNames.unitTypeCountPerQuad(horizQuad, vertQuad, u.getPlayer(), u.getType());
+					String name = FeatureNames.unitsOfTypePerQuad(horizQuad, vertQuad, u.getPlayer(), u.getType());
 					
 					// counts and increment the number of the given unit in the current quadrant
 					Feature typeCountPerQuadrant = features.get(name);

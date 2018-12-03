@@ -21,7 +21,7 @@ public class FeatureNames {
 	 * @param type
 	 * @return
 	 */
-	public static String unitTypeCountPerQuad(int xQuad, int yQuad, int owner, UnitType type){
+	public static String unitsOfTypePerQuad(int xQuad, int yQuad, int owner, UnitType type){
 		// feature name: unit_quad-x-y-owner-type
 		return String.format(
 			UNIT_COUNT + "-%d-%d-%d-%s", 
