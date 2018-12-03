@@ -18,7 +18,8 @@ import rts.units.UnitTypeTable;
 /**
  * A class to run microRTS games to train and test MetaBot
  * @author anderson
- *
+ * TODO read the number of matches from a config file
+ * TODO use the methods to save and load weights
  */
 public class Runner {
 
@@ -78,7 +79,7 @@ public class Runner {
         }while(!gameover && gs.getTime()<settings.getMaxCycles());
         ai1.gameOver(gs.winner());
         ai2.gameOver(gs.winner());    
-
+        System.out.println("Finished.");
 	}
 
 	/**

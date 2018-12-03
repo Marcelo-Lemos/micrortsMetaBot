@@ -177,9 +177,10 @@ public class Sarsa {
         	//trick to randomly select from HashMap adapted from: https://stackoverflow.com/a/9919827/1251716
         	List<String> keys = new ArrayList<String>(portfolio.keySet());
         	choiceName = keys.get(random.nextInt(keys.size()));
+        	if(choiceName==null){System.err.println("ERROR!!!");}
         }
         else { //greedy choice
-        	double maxQ = Double.MIN_VALUE;
+        	double maxQ = Double.NEGATIVE_INFINITY; //because MIN_VALUE is positive =/
         	
         	for(String aiName: weights.keySet()){
         		double q = qValue(features, aiName);
@@ -188,6 +189,7 @@ public class Sarsa {
         			choiceName = aiName;
         		}
         	}
+        	if(choiceName==null){System.err.println("***ERROR!!!");}
         }
         
         return portfolio.get(choiceName);
