@@ -211,8 +211,9 @@ public class MetaBot extends AI {
     	
     	learningAgent.learn(previousState, choice, reward, currentState, true, myPlayerNumber);
     	
-    	//tests whether the output prefix has been specified to save the weights
     	Properties config = ConfigLoader.getConfiguration();
+    	
+    	//tests whether the output prefix has been specified to save the weights (binary)
     	if (config.containsKey("rl.output.binprefix")){
     		String prefix = config.getProperty("rl.output.binprefix");
     		File file = new File(prefix + "_0.weights"); 
@@ -224,7 +225,11 @@ public class MetaBot extends AI {
     		
     		// finally, saves the weights
     		learningAgent.saveBin(file.getAbsolutePath()); 
-    		
+    	}
+    	
+    	//tests whether the output prefix has been specified to save the weights (human-readable)
+    	if (config.containsKey("rl.output.humanprefix")){
+    		learningAgent.saveHuman(config.getProperty("rl.output.humanprefix"));
     	}
     	
     	

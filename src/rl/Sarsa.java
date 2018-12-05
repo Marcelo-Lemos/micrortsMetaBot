@@ -307,10 +307,10 @@ public class Sarsa {
      * for each portfolio member and appends a line with the weights separated by comma.
      * The order of weights is as given by weights.get(portfolioMember).values()
      * 
-     * @param path
+     * @param prefix
      * @throws IOException
      */
-    public void saveHuman(String path) throws IOException{
+    public void saveHuman(String prefix) throws IOException{
     	if(weights == null){
     		throw new RuntimeException("Attempted to save non-initialized weights");
     	}
@@ -318,13 +318,17 @@ public class Sarsa {
     	// creates a file for each AI in the portfolio (they're the keys of the weights map)
     	// if the file already exists, the weights will be appended
     	for(String aiName : weights.keySet()){
-    		File f = new File(path);
-        	FileWriter writer = new FileWriter(f, true);
-        	if(!f.exists()){
+    		File f = new File(prefix + "_" + aiName + ".csv");
+    		FileWriter writer; 
+    		
+        	if(!f.exists()){ // creates a new file and writes the header
+        		writer = new FileWriter(f, false); //must be after the test, because it creates the file upon instantiation
         		writer.write("#" + String.join(",", weights.get(aiName).keySet()) + "\n");
+        		writer.close();
         	}
         	
-        	// writes one line with each weight value separated by a comma
+        	// appends one line with each weight value separated by a comma
+        	writer = new FileWriter(f, true); 
         	String line = "";
         	for(double value : weights.get(aiName).values()){
         		line += ""+value + ", ";
