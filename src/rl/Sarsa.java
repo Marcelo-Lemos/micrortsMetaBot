@@ -1,11 +1,14 @@
 package rl;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,13 +303,48 @@ public class Sarsa {
     }
     
     /**
+     * Saves the weights in human-readable (csv) format. Creates one file
+     * for each portfolio member and appends a line with the weights separated by comma.
+     * The order of weights is as given by weights.get(portfolioMember).values()
+     * 
+     * @param path
+     * @throws IOException
+     */
+    public void saveHuman(String path) throws IOException{
+    	if(weights == null){
+    		throw new RuntimeException("Attempted to save non-initialized weights");
+    	}
+    	
+    	// creates a file for each AI in the portfolio (they're the keys of the weights map)
+    	// if the file already exists, the weights will be appended
+    	for(String aiName : weights.keySet()){
+    		File f = new File(path);
+        	FileWriter writer = new FileWriter(f, true);
+        	if(!f.exists()){
+        		writer.write("#" + String.join(",", weights.get(aiName).keySet()) + "\n");
+        	}
+        	
+        	// writes one line with each weight value separated by a comma
+        	String line = "";
+        	for(double value : weights.get(aiName).values()){
+        		line += ""+value + ", ";
+        	}
+        	line = line.replaceAll(",$", ""); //removes the trailing comma
+        	
+        	writer.write(line + "\n");
+        	
+        	writer.close();
+    	}
+    }
+    
+    /**
      * Saves the weight 'vector' to a file in the specified path
      * by serializing the weights HashMap.
      * The file is overridden if already exists.
      * @param path
      * @throws IOException
      */
-    public void save(String path) throws IOException{
+    public void saveBin(String path) throws IOException{
     	if(weights == null){
     		throw new RuntimeException("Attempted to save non-initialized weights");
     	}
@@ -325,7 +363,7 @@ public class Sarsa {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-	public void load(String path) throws IOException{
+	public void loadBin(String path) throws IOException{
     	FileInputStream fis = new FileInputStream(path);
         ObjectInputStream ois = new ObjectInputStream(fis);
         try {

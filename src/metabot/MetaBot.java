@@ -1,5 +1,6 @@
 package metabot;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,9 @@ public class MetaBot extends AI {
     
     private Sarsa learningAgent;
     
+    /**
+     * Stores the player number to retrieve actions and determine match outcome
+     */
     int myPlayerNumber;
     
     // BEGIN -- variables to feed the learning agent
@@ -107,6 +111,16 @@ public class MetaBot extends AI {
         // creates the learning agent with the specified portfolio
         //TODO customize by loading according to rl.agent in config
         learningAgent = new Sarsa(portfolio);
+        
+        if (config.containsKey("rl.bin_input")){
+        	try {
+				learningAgent.loadBin(config.getProperty("rl.bin_input"));
+			} catch (IOException e) {
+				System.err.println("Error while loading weights from " + config.getProperty("rl.input"));
+				System.err.println("Starting randomly.");
+				e.printStackTrace();
+			}
+        }
         
         reset();
     }
@@ -196,6 +210,24 @@ public class MetaBot extends AI {
     	else reward = -1; //I lost
     	
     	learningAgent.learn(previousState, choice, reward, currentState, true, myPlayerNumber);
+    	
+    	//tests whether the output prefix has been specified to save the weights
+    	Properties config = ConfigLoader.getConfiguration();
+    	if (config.containsKey("rl.output.binprefix")){
+    		String prefix = config.getProperty("rl.output.binprefix");
+    		File file = new File(prefix + "_0.weights"); 
+
+    		// finds the next number to append to prefix and save the weights
+    		for (int num = 0; file.exists(); num++) {
+    		    file = new File(prefix + "_" + num + ".weights");
+    		}
+    		
+    		// finally, saves the weights
+    		learningAgent.saveBin(file.getAbsolutePath()); 
+    		
+    	}
+    	
+    	
     }
     
     public AI clone() {
