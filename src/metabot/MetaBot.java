@@ -70,7 +70,7 @@ public class MetaBot extends AI {
 			config = ConfigLoader.loadConfig(configPath);
 			members = config.getProperty("portfolio.members");
 		} catch (IOException e) {
-			System.err.println("Error while loading configuration from " + configPath+ ". Using defaults.");
+			System.err.println("Error while loading configuration from '" + configPath+ "'. Using defaults.");
 			e.printStackTrace();
 			
 			members = "WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks";

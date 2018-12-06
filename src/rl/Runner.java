@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Properties;
 
 import ai.core.AI;
@@ -24,10 +25,12 @@ public class Runner {
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
 		InputStream is;
-		if(args.length > 1){
-			is = new FileInputStream(args[1]);
+		if(args.length > 0){
+			is = new FileInputStream(args[0]);
 		}
 		else {
+			System.out.println("Input not specified, reading from 'config/microrts.properties'");
+			System.out.println("args: " + Arrays.toString(args));
 			is = new FileInputStream("config/microrts.properties");
 		}
         prop.load(is);

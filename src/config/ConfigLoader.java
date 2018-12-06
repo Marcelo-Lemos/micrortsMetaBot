@@ -1,12 +1,11 @@
 package config;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import rts.GameSettings;
+import javax.security.auth.login.Configuration;
 
 /**
  * Emulates a singleton version of {@link Configuration}.
@@ -45,7 +44,7 @@ public class ConfigLoader {
 	 */
 	public static Properties loadConfig(String path) throws IOException{
 		configInstance = new Properties();
-		InputStream is = new FileInputStream(path);
+		InputStream is = new FileInputStream(path.trim());
 		configInstance.load(is);
 		is.close();
         return configInstance;
