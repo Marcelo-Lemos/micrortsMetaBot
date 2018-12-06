@@ -1,10 +1,14 @@
 package rl;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 
 import ai.core.AI;
@@ -22,6 +26,11 @@ import rts.units.UnitTypeTable;
  */
 public class Runner {
 
+	public static final int MATCH_ERROR = 2;
+	public static final int DRAW = -1;
+	public static final int P1_WINS = 0;
+	public static final int P2_WINS = 1;
+	
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
 		InputStream is;
@@ -42,11 +51,28 @@ public class Runner {
         AI ai1 = loadAI(settings.getAI1(), utt, prop);
         AI ai2 = loadAI(settings.getAI2(), utt, prop);
         
-        int numGames = Integer.parseInt(prop.getProperty("num_games", "1"));
+        int numGames = Integer.parseInt(prop.getProperty("runner.num_games", "1"));
         
         for(int i = 0; i < numGames; i++){
-        	headlessMatch(ai1, ai2, settings.getMapLocation(), settings.getMaxCycles(), utt, settings.isPartiallyObservable());
+        	Date begin = new Date(System.currentTimeMillis());
+        	int result = headlessMatch(ai1, ai2, settings.getMapLocation(), settings.getMaxCycles(), utt, settings.isPartiallyObservable());
+        	Date end = new Date(System.currentTimeMillis());
+        	
         	System.out.print(String.format("\rMatch %8d finished.", i+1));
+        	
+        	long duration = end.getTime() - begin.getTime();
+        	
+        	if (prop.containsKey("runner.output")){
+        		try{
+        			outputSummary(prop.getProperty("runner.output"), result, duration, begin, end);
+        		}
+        		catch(IOException ioe){
+        			System.err.println("Error while trying to write summary to '" + prop.getProperty("runner.output") + "'");
+        			ioe.printStackTrace();
+        		}
+        		
+        	}
+        	
         	
         	ai1.reset();
         	ai2.reset();
@@ -65,7 +91,7 @@ public class Runner {
 	 * @param partiallyObservable
 	 * @throws Exception
 	 */
-    public static void headlessMatch(AI ai1, AI ai2, String mapFile, int timeLimit, UnitTypeTable types, boolean partiallyObservable) throws Exception{
+    public static int headlessMatch(AI ai1, AI ai2, String mapFile, int timeLimit, UnitTypeTable types, boolean partiallyObservable) throws Exception{
         PhysicalGameState pgs;
 		try {
 			pgs = PhysicalGameState.load(mapFile, types);
@@ -73,7 +99,7 @@ public class Runner {
 			System.err.println("Error while loading map from file: " + mapFile);
 			e.printStackTrace();
 			System.err.println("Aborting match execution...");
-			return;
+			return MATCH_ERROR;
 		}
 
         GameState state = new GameState(pgs, types);
@@ -104,8 +130,28 @@ public class Runner {
 		} 
 		ai1.gameOver(state.winner());
 		ai2.gameOver(state.winner());
+		
+		return state.winner();
     }
 
+    
+    public static void outputSummary(String path, int result, long duration, Date start, Date finish) throws IOException{
+    	File f = new File(path);
+		FileWriter writer; 
+		
+    	if(!f.exists()){ // creates a new file and writes the header
+    		writer = new FileWriter(f, false); //must be after the test, because it creates the file upon instantiation
+    		writer.write("#result,duration(ms),initial_time,final_time\n");
+    		writer.close();
+    	}
+    	
+    	// appends one line with each weight value separated by a comma
+    	writer = new FileWriter(f, true); 
+    	writer.write(String.format("%d,%d,%s,%s\n", result, duration, start, finish));
+    	
+    	writer.close();
+	}
+    
 	/**
 	 * Loads an {@link AI} according to its name, using the provided UnitTypeTable.
 	 * If the AI is {@link MetaBot}, loads it with the configuration file specified in 
