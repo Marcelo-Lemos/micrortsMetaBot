@@ -18,7 +18,6 @@ import rts.units.UnitTypeTable;
 /**
  * A class to run microRTS games to train and test MetaBot
  * @author anderson
- * TODO use the methods to save and load weights
  */
 public class Runner {
 
