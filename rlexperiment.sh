@@ -1,6 +1,6 @@
 #!/bin/bash
 
-classpath=.:bin:lib/:../starcraft/microrts/bin*
+classpath=.:bin:lib/*
 
 echo "Launching experiment..."
 
