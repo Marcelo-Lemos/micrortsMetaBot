@@ -45,6 +45,9 @@ public class Runner {
         for(int i = 0; i < numGames; i++){
         	headlessMatch(ai1, ai2, settings.getMapLocation(), settings.getMaxCycles(), utt, settings.isPartiallyObservable());
         	System.out.print(String.format("\rMatch %8d finished.", i+1));
+        	
+        	ai1.reset();
+        	ai2.reset();
         }
         
         System.out.println("\nExecuted " + numGames + " matches.");
