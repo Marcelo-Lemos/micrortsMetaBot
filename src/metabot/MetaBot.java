@@ -1,12 +1,14 @@
 package metabot;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import ai.abstraction.HeavyRush;
 import ai.abstraction.LightRush;
@@ -32,6 +34,11 @@ public class MetaBot extends AI {
     private Map<String,AI> portfolio;
     
     private Sarsa learningAgent;
+    
+    /**
+     * Stores the choices made for debugging purposes
+     */
+    private List<String> choices;
     
     /**
      * Stores the player number to retrieve actions and determine match outcome
@@ -62,7 +69,7 @@ public class MetaBot extends AI {
      */
     public MetaBot(UnitTypeTable utt, String configPath){
     	myUnitTypeTable = utt;
-        
+    	
         // loads the configuration
         Properties config = null;
         String members;
@@ -161,6 +168,8 @@ public class MetaBot extends AI {
     	currentState = null;
     	myPlayerNumber = -1;
     	
+    	choices = new ArrayList<>(3000);
+    	
     }
        
     public PlayerAction getAction(int player, GameState state) {
@@ -190,6 +199,8 @@ public class MetaBot extends AI {
     	
         // selected is the AI that will perform our action, let's try it:
     	choice = learningAgent.act(state, player);
+    	
+    	choices.add(choice.toString());
     	
         try {
 			return choice.getAction(player, state);
@@ -230,6 +241,22 @@ public class MetaBot extends AI {
     	//tests whether the output prefix has been specified to save the weights (human-readable)
     	if (config.containsKey("rl.output.humanprefix")){
     		learningAgent.saveHuman(config.getProperty("rl.output.humanprefix"));
+    	}
+    	
+    	// check if it needs to save the choices
+    	if (config.containsKey("output.choices_prefix")){
+    		String prefix = config.getProperty("output.choices_prefix");
+    		File file = new File(prefix + "_0.choices"); 
+
+    		// finds the next number to append to prefix and save the weights
+    		for (int num = 0; file.exists(); num++) {
+    		    file = new File(prefix + "_" + num + ".choices");
+    		}
+    		
+    		// finally, saves the weights
+    		FileWriter writer = new FileWriter(file);
+    		writer.write(String.join("\n", choices));
+    		writer.close();
     	}
     	
     	

@@ -14,12 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import ai.core.AI;
 import config.ConfigLoader;
 import features.Feature;
 import features.FeatureExtractor;
 import features.QuadrantModelFeatureExtractor;
+import metabot.MetaBot;
 import rts.GameState;
 
 /**
@@ -70,6 +72,8 @@ public class Sarsa {
      * Eligibility trace
      */
     private double lambda;
+    
+    //private final static Logger logger = Logger.getLogger(Sarsa.class.getName());
     
     /**
      * Will return the feature values according to state
