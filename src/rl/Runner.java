@@ -1,10 +1,8 @@
 package rl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -12,16 +10,21 @@ import java.util.Date;
 import java.util.Properties;
 
 import ai.core.AI;
+import config.ConfigLoader;
 import metabot.MetaBot;
 import rts.GameSettings;
 import rts.GameState;
 import rts.PartiallyObservableGameState;
 import rts.PhysicalGameState;
 import rts.PlayerAction;
+import rts.Trace;
+import rts.TraceEntry;
 import rts.units.UnitTypeTable;
+import util.XMLWriter;
 
 /**
  * A class to run microRTS games to train and test MetaBot
+ * TODO make an utilitary to grab the next available file number 
  * @author anderson
  */
 public class Runner {
@@ -33,19 +36,20 @@ public class Runner {
 	
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
-		InputStream is;
+		String configFile;
 		if(args.length > 0){
-			is = new FileInputStream(args[0]);
+			configFile = args[0];
 		}
 		else {
 			System.out.println("Input not specified, reading from 'config/microrts.properties'");
 			System.out.println("args: " + Arrays.toString(args));
-			is = new FileInputStream("config/microrts.properties");
+			configFile = "config/microrts.properties";
 		}
-        prop.load(is);
+		
+		// loads the two forms of configuration object
+        prop = ConfigLoader.loadConfig(configFile);
 		GameSettings settings = GameSettings.loadFromConfig(prop);
 		System.out.println(settings);
-		is.close();
 		
 		UnitTypeTable utt = new UnitTypeTable(settings.getUTTVersion(), settings.getConflictPolicy());
         AI ai1 = loadAI(settings.getAI1(), utt, prop);
@@ -102,11 +106,17 @@ public class Runner {
 			return MATCH_ERROR;
 		}
 
-        GameState state = new GameState(pgs, types);
+		GameState state = new GameState(pgs, types);
+		
+		// creates the trace logger
+		Trace trace = new Trace(types);
         
         boolean gameover = false;
     	
         while (!gameover && state.getTime() < timeLimit) {
+        	// traces the current state
+        	trace.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
+        	
         	// initializes state equally for the players 
         	GameState player1State = state; 
         	GameState player2State = state; 
@@ -130,6 +140,30 @@ public class Runner {
 		} 
 		ai1.gameOver(state.winner());
 		ai2.gameOver(state.winner());
+		
+		//traces the final state
+		trace.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
+		
+		//writes the trace
+		String output = "/dev/null";
+		Properties prop = ConfigLoader.getConfiguration();
+		
+		if(prop.containsKey("runner.trace_prefix")){
+			String prefix = prop.getProperty("runner.trace_prefix");
+			output = prefix + "_0.trace";
+			
+    		File file = new File(output); 
+
+    		// finds the next number to append to prefix and save the weights
+    		for (int num = 0; file.exists(); num++) {
+    			output = prefix + "_" + num + ".trace";
+    		    file = new File(output);
+    		}
+    		
+		}
+		XMLWriter xml = new XMLWriter(new FileWriter(output));
+        trace.toxml(xml);
+        xml.flush();
 		
 		return state.winner();
     }
