@@ -200,7 +200,7 @@ public class MetaBot extends AI {
         // selected is the AI that will perform our action, let's try it:
     	choice = learningAgent.act(state, player);
     	
-    	choices.add(choice.toString());
+    	choices.add(choice.getClass().getSimpleName());
     	
         try {
 			return choice.getAction(player, state);
