@@ -1,6 +1,5 @@
 package metabot;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,7 +111,6 @@ public class MetaBot extends AI {
         	}
         	
         	else throw new RuntimeException("Unknown portfolio member '" + name +"'");
-        	
         }
         
         // creates the learning agent with the specified portfolio

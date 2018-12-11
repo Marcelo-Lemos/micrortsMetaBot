@@ -53,8 +53,8 @@ public class Runner {
 		System.out.println(settings);
 		
 		UnitTypeTable utt = new UnitTypeTable(settings.getUTTVersion(), settings.getConflictPolicy());
-        AI ai1 = loadAI(settings.getAI1(), utt, 1);
-        AI ai2 = loadAI(settings.getAI2(), utt, 2);
+        AI ai1 = loadAI(settings.getAI1(), utt, 1, prop);
+        AI ai2 = loadAI(settings.getAI2(), utt, 2, prop);
         
         int numGames = Integer.parseInt(prop.getProperty("runner.num_games", "1"));
         
@@ -206,12 +206,12 @@ public class Runner {
 	 * @throws IllegalArgumentException
 	 * @throws InvocationTargetException
 	 */
-	public static AI loadAI(String aiName, UnitTypeTable utt, int playerNumber) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+	public static AI loadAI(String aiName, UnitTypeTable utt, int playerNumber, Properties config) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 		AI ai;
-		Properties config = ConfigLoader.getConfiguration();
 		
 		// (custom) loads MetaBot with its configuration file
 		if(aiName.equalsIgnoreCase("metabot.MetaBot")) {
+			System.out.println("Loading MetaBot");
 			String configKey = String.format("player%d.config", playerNumber);
 			if(config.containsKey(configKey)){
 				ai = new MetaBot(utt, config.getProperty(configKey));
