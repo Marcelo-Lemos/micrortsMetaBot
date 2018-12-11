@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import ai.abstraction.HeavyRush;
 import ai.abstraction.LightRush;
@@ -23,6 +22,7 @@ import rl.Sarsa;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.units.UnitTypeTable;
+import utils.FileNameUtil;
 
 public class MetaBot extends AI {
     UnitTypeTable myUnitTypeTable = null;
@@ -116,7 +116,6 @@ public class MetaBot extends AI {
         }
         
         // creates the learning agent with the specified portfolio
-        //TODO customize by loading according to rl.agent in config
         learningAgent = new Sarsa(portfolio);
         
         if (config.containsKey("rl.bin_input")){
@@ -226,16 +225,10 @@ public class MetaBot extends AI {
     	
     	//tests whether the output prefix has been specified to save the weights (binary)
     	if (config.containsKey("rl.output.binprefix")){
-    		String prefix = config.getProperty("rl.output.binprefix");
-    		File file = new File(prefix + "_0.weights"); 
-
-    		// finds the next number to append to prefix and save the weights
-    		for (int num = 0; file.exists(); num++) {
-    		    file = new File(prefix + "_" + num + ".weights");
-    		}
-    		
-    		// finally, saves the weights
-    		learningAgent.saveBin(file.getAbsolutePath()); 
+    		String filename = FileNameUtil.nextAvailableFileName(
+				config.getProperty("rl.output.binprefix"), "weights"
+			);
+    		learningAgent.saveBin(filename); 
     	}
     	
     	//tests whether the output prefix has been specified to save the weights (human-readable)
@@ -245,16 +238,14 @@ public class MetaBot extends AI {
     	
     	// check if it needs to save the choices
     	if (config.containsKey("output.choices_prefix")){
-    		String prefix = config.getProperty("output.choices_prefix");
-    		File file = new File(prefix + "_0.choices"); 
-
-    		// finds the next number to append to prefix and save the weights
-    		for (int num = 0; file.exists(); num++) {
-    		    file = new File(prefix + "_" + num + ".choices");
-    		}
     		
-    		// finally, saves the weights
-    		FileWriter writer = new FileWriter(file);
+    		// finds the file name
+    		String filename = FileNameUtil.nextAvailableFileName(
+				config.getProperty("output.choices_prefix"), "choices"
+			);
+        		
+    		// saves the weights
+    		FileWriter writer = new FileWriter(filename);
     		writer.write(String.join("\n", choices));
     		writer.close();
     	}

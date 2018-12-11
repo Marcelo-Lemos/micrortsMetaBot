@@ -21,6 +21,7 @@ import rts.Trace;
 import rts.TraceEntry;
 import rts.units.UnitTypeTable;
 import util.XMLWriter;
+import utils.FileNameUtil;
 
 /**
  * A class to run microRTS games to train and test MetaBot
@@ -109,7 +110,7 @@ public class Runner {
 		GameState state = new GameState(pgs, types);
 		
 		// creates the trace logger
-		Trace trace = new Trace(types);
+		Trace replay = new Trace(types);
         
         boolean gameover = false;
     	
@@ -137,7 +138,7 @@ public class Runner {
         	if (!player2Action.isEmpty()) {
                 thisFrame.addPlayerAction(player2Action.clone());
             }
-        	trace.addEntry(thisFrame);
+        	replay.addEntry(thisFrame);
 
 			
         	// issues the players' actions
@@ -151,27 +152,21 @@ public class Runner {
 		ai2.gameOver(state.winner());
 		
 		//traces the final state
-		trace.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
+		replay.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
 		
 		//writes the trace
 		String output = "/dev/null";
 		Properties prop = ConfigLoader.getConfiguration();
 		
 		if(prop.containsKey("runner.trace_prefix")){
-			String prefix = prop.getProperty("runner.trace_prefix");
-			output = prefix + "_0.trace";
-			
-    		File file = new File(output); 
-
-    		// finds the next number to append to prefix and save the weights
-    		for (int num = 0; file.exists(); num++) {
-    			output = prefix + "_" + num + ".trace";
-    		    file = new File(output);
-    		}
+			// finds the file name
+    		output = FileNameUtil.nextAvailableFileName(
+				prop.getProperty("runner.trace_prefix"), "trace"
+			);
     		
 		}
 		XMLWriter xml = new XMLWriter(new FileWriter(output));
-        trace.toxml(xml);
+        replay.toxml(xml);
         xml.flush();
 		
 		return state.winner();
