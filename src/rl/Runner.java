@@ -114,8 +114,6 @@ public class Runner {
         boolean gameover = false;
     	
         while (!gameover && state.getTime() < timeLimit) {
-        	// traces the current state
-        	trace.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
         	
         	// initializes state equally for the players 
         	GameState player1State = state; 
@@ -130,6 +128,17 @@ public class Runner {
         	// retrieves the players' actions
         	PlayerAction player1Action = ai1.getAction(0, player1State);
         	PlayerAction player2Action = ai2.getAction(1, player2State);
+        	
+        	// creates a new trace entry, fills the actions and stores it
+        	TraceEntry thisFrame = new TraceEntry(state.getPhysicalGameState().clone(), state.getTime());
+        	if (!player1Action.isEmpty()){
+        		thisFrame.addPlayerAction(player1Action.clone());
+        	}
+        	if (!player2Action.isEmpty()) {
+                thisFrame.addPlayerAction(player2Action.clone());
+            }
+        	trace.addEntry(thisFrame);
+
 			
         	// issues the players' actions
 			state.issueSafe(player1Action);
