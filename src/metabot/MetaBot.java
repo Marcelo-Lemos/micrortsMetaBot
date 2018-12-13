@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ai.abstraction.HeavyRush;
 import ai.abstraction.LightRush;
 import ai.abstraction.RangedRush;
@@ -25,6 +28,8 @@ import utils.FileNameUtil;
 
 public class MetaBot extends AI {
     UnitTypeTable myUnitTypeTable = null;
+    
+    Logger logger;
     
     /**
      * Stores MetaBot-related configurations loaded from a .property file
@@ -74,19 +79,21 @@ public class MetaBot extends AI {
     public MetaBot(UnitTypeTable utt, String configPath){
     	myUnitTypeTable = utt;
     	
+    	logger = LogManager.getLogger(MetaBot.class);
+    	
         // loads the configuration
         String members;
 		try {
 			config = ConfigManager.loadConfig(configPath);
 			members = config.getProperty("portfolio.members");
 		} catch (IOException e) {
-			System.err.println("Error while loading configuration from '" + configPath+ "'. Using defaults.");
-			e.printStackTrace();
+			logger.error("Error while loading configuration from '" + configPath+ "'. Using defaults.", e);
 			
 			members = "WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks";
 		}
         
         String[] memberNames = members.split(",");
+        logger.trace("Portfolio members: ", String.join(",", memberNames));
         
         //loads the portfolio according to the file specification
         portfolio = new HashMap<>();
@@ -124,8 +131,8 @@ public class MetaBot extends AI {
         	try {
 				learningAgent.loadBin(config.getProperty("rl.bin_input"));
 			} catch (IOException e) {
-				System.err.println("Error while loading weights from " + config.getProperty("rl.input"));
-				System.err.println("Starting randomly.");
+				logger.error("Error while loading weights from " + config.getProperty("rl.input"), e);
+				logger.error("Weights initialized randomly.");
 				e.printStackTrace();
 			}
         }
@@ -206,8 +213,8 @@ public class MetaBot extends AI {
         try {
 			return choice.getAction(player, state);
 		} catch (Exception e) {
-			System.err.println("Exception while getting action in frame #" + state.getTime() + " from " + choice.getClass().getSimpleName());
-			System.err.println("Defaulting to empty action");
+			logger.error("Exception while getting action in frame #" + state.getTime() + " from " + choice.getClass().getSimpleName(), e);
+			logger.error("Defaulting to empty action");
 			e.printStackTrace();
 			
 			PlayerAction pa = new PlayerAction();
