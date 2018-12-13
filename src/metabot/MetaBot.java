@@ -14,7 +14,7 @@ import ai.abstraction.RangedRush;
 import ai.abstraction.WorkerRush;
 import ai.core.AI;
 import ai.core.ParameterSpecification;
-import config.ConfigLoader;
+import config.ConfigManager;
 import metabot.portfolio.BuildBarracks;
 import metabot.portfolio.Expand;
 import rl.Sarsa;
@@ -25,6 +25,11 @@ import utils.FileNameUtil;
 
 public class MetaBot extends AI {
     UnitTypeTable myUnitTypeTable = null;
+    
+    /**
+     * The key to retrieve MetaBot-related configurations loaded from .property files
+     */
+    public static final String METABOT_CONFIG_KEY = "metabot";
     
     /**
      * An array of AI's, which are used as 'sub-bots' to play the game.
@@ -73,7 +78,7 @@ public class MetaBot extends AI {
         Properties config = null;
         String members;
 		try {
-			config = ConfigLoader.loadConfig(configPath);
+			config = ConfigManager.getInstance().newConfig(METABOT_CONFIG_KEY, configPath);
 			members = config.getProperty("portfolio.members");
 		} catch (IOException e) {
 			System.err.println("Error while loading configuration from '" + configPath+ "'. Using defaults.");
@@ -113,8 +118,8 @@ public class MetaBot extends AI {
         	else throw new RuntimeException("Unknown portfolio member '" + name +"'");
         }
         
-        // creates the learning agent with the specified portfolio
-        learningAgent = new Sarsa(portfolio);
+        // creates the learning agent with the specified portfolio and loaded parameters
+        learningAgent = new Sarsa(portfolio, config);
         
         if (config.containsKey("rl.bin_input")){
         	try {
@@ -211,7 +216,7 @@ public class MetaBot extends AI {
 			return pa;
 		}
     }    
-    
+    //FIXME not saving weights on self play! probably due to different config objects...
     public void gameOver(int winner) throws Exception {
     	if (winner == -1) reward = 0; //game not finished (timeout) or draw
     	else if (winner == myPlayerNumber) reward = 1; //I won
@@ -219,7 +224,7 @@ public class MetaBot extends AI {
     	
     	learningAgent.learn(previousState, choice, reward, currentState, true, myPlayerNumber);
     	
-    	Properties config = ConfigLoader.getConfiguration();
+    	Properties config = ConfigManager.getInstance().getConfig(METABOT_CONFIG_KEY);
     	
     	//tests whether the output prefix has been specified to save the weights (binary)
     	if (config.containsKey("rl.output.binprefix")){

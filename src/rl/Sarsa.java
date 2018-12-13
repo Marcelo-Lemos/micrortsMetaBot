@@ -8,16 +8,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import ai.core.AI;
-import config.ConfigLoader;
+import config.ConfigManager;
 import features.Feature;
 import features.FeatureExtractor;
 import features.QuadrantModelFeatureExtractor;
@@ -99,11 +97,23 @@ public class Sarsa {
      */
     private Map<String,AI> portfolio;
     
+    /**
+     * Constructor that loads parameters according to the MetaBot configuration key
+     * @deprecated
+     * @param portfolio
+     */
     public Sarsa(Map<String,AI> portfolio){
         
-    	Properties config = ConfigLoader.getConfiguration();
-        
-        random = new Random(Integer.parseInt(config.getProperty("rl.random.seed")));
+        this(portfolio, ConfigManager.getInstance().getConfig(MetaBot.METABOT_CONFIG_KEY));
+    }
+
+	/**
+	 * Loads the parameters from a specific Properties object
+	 * @param portfolio
+	 * @param config
+	 */
+	public Sarsa(Map<String, AI> portfolio, Properties config) {
+		random = new Random(Integer.parseInt(config.getProperty("rl.random.seed")));
         
         epsilon = Double.parseDouble(config.getProperty("rl.epsilon.initial", "0.1"));
         epsilonDecayRate = Double.parseDouble(config.getProperty("rl.epsilon.decay", "1.0"));
@@ -124,7 +134,7 @@ public class Sarsa {
         weights = null;
         
         this.portfolio = portfolio;
-    }
+	}
 
     /**
      * Initializes the weight vector (to be called at the first game frame)

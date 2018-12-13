@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import ai.core.AI;
-import config.ConfigLoader;
+import config.ConfigManager;
 import metabot.MetaBot;
 import rts.GameSettings;
 import rts.GameState;
@@ -35,6 +35,8 @@ public class Runner {
 	public static final int P1_WINS = 0;
 	public static final int P2_WINS = 1;
 	
+	public static final String RUNNER_CONFIG_KEY = "runner";
+	
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
 		String configFile;
@@ -48,7 +50,7 @@ public class Runner {
 		}
 		
 		// loads the two forms of configuration object
-        prop = ConfigLoader.loadConfig(configFile);
+        prop = ConfigManager.getInstance().newConfig(RUNNER_CONFIG_KEY, configFile);
 		GameSettings settings = GameSettings.loadFromConfig(prop);
 		System.out.println(settings);
 		
@@ -156,7 +158,7 @@ public class Runner {
 		
 		//writes the trace
 		String output = "/dev/null";
-		Properties prop = ConfigLoader.getConfiguration();
+		Properties prop = ConfigManager.getInstance().getConfig(RUNNER_CONFIG_KEY);
 		
 		if(prop.containsKey("runner.trace_prefix")){
 			// finds the file name
