@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ai.core.AI;
 import config.ConfigManager;
 import metabot.MetaBot;
@@ -37,12 +40,16 @@ public class Runner {
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
 		String configFile;
+		
+		Logger logger = LogManager.getRootLogger();
+
 		if(args.length > 0){
+			logger.debug("Loading experiment configuration from {}", args[0]);
 			configFile = args[0];
 		}
 		else {
-			System.out.println("Input not specified, reading from 'config/microrts.properties'");
-			System.out.println("args: " + Arrays.toString(args));
+			logger.debug("Input not specified, reading from 'config/microrts.properties'");
+			logger.debug("args: " + Arrays.toString(args));
 			configFile = "config/microrts.properties";
 		}
 		
@@ -75,6 +82,7 @@ public class Runner {
         	Date end = new Date(System.currentTimeMillis());
         	
         	System.out.print(String.format("\rMatch %8d finished.", i+1));
+        	//logger.info(String.format("Match %8d finished.", i+1));
         	
         	long duration = end.getTime() - begin.getTime();
         	
@@ -83,8 +91,8 @@ public class Runner {
         			outputSummary(prop.getProperty("runner.output"), result, duration, begin, end);
         		}
         		catch(IOException ioe){
-        			System.err.println("Error while trying to write summary to '" + prop.getProperty("runner.output") + "'");
-        			ioe.printStackTrace();
+        			logger.error("Error while trying to write summary to '" + prop.getProperty("runner.output") + "'", ioe);
+        			
         		}
         		
         	}
