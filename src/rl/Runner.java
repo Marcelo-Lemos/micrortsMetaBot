@@ -42,7 +42,7 @@ public class Runner {
 		String configFile;
 		
 		Logger logger = LogManager.getRootLogger();
-
+		
 		if(args.length > 0){
 			logger.debug("Loading experiment configuration from {}", args[0]);
 			configFile = args[0];
