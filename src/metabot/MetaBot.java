@@ -27,9 +27,9 @@ public class MetaBot extends AI {
     UnitTypeTable myUnitTypeTable = null;
     
     /**
-     * The key to retrieve MetaBot-related configurations loaded from .property files
+     * Stores MetaBot-related configurations loaded from a .property file
      */
-    public static final String METABOT_CONFIG_KEY = "metabot";
+    private Properties config;
     
     /**
      * An array of AI's, which are used as 'sub-bots' to play the game.
@@ -75,10 +75,9 @@ public class MetaBot extends AI {
     	myUnitTypeTable = utt;
     	
         // loads the configuration
-        Properties config = null;
         String members;
 		try {
-			config = ConfigManager.getInstance().newConfig(METABOT_CONFIG_KEY, configPath);
+			config = ConfigManager.loadConfig(configPath);
 			members = config.getProperty("portfolio.members");
 		} catch (IOException e) {
 			System.err.println("Error while loading configuration from '" + configPath+ "'. Using defaults.");
@@ -215,16 +214,14 @@ public class MetaBot extends AI {
 			pa.fillWithNones(state, player, 1);
 			return pa;
 		}
-    }    
-    //FIXME not saving weights on self play! probably due to different config objects...
+    }   
+    
     public void gameOver(int winner) throws Exception {
     	if (winner == -1) reward = 0; //game not finished (timeout) or draw
     	else if (winner == myPlayerNumber) reward = 1; //I won
     	else reward = -1; //I lost
     	
     	learningAgent.learn(previousState, choice, reward, currentState, true, myPlayerNumber);
-    	
-    	Properties config = ConfigManager.getInstance().getConfig(METABOT_CONFIG_KEY);
     	
     	//tests whether the output prefix has been specified to save the weights (binary)
     	if (config.containsKey("rl.output.binprefix")){

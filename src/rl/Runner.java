@@ -25,7 +25,6 @@ import utils.FileNameUtil;
 
 /**
  * A class to run microRTS games to train and test MetaBot
- * TODO make an utilitary to grab the next available file number 
  * @author anderson
  */
 public class Runner {
@@ -34,8 +33,6 @@ public class Runner {
 	public static final int DRAW = -1;
 	public static final int P1_WINS = 0;
 	public static final int P2_WINS = 1;
-	
-	public static final String RUNNER_CONFIG_KEY = "runner";
 	
 	public static void main(String[] args) throws Exception {
 		Properties prop = new Properties();
@@ -50,7 +47,7 @@ public class Runner {
 		}
 		
 		// loads the two forms of configuration object
-        prop = ConfigManager.getInstance().newConfig(RUNNER_CONFIG_KEY, configFile);
+        prop = ConfigManager.loadConfig(configFile);
 		GameSettings settings = GameSettings.loadFromConfig(prop);
 		System.out.println(settings);
 		
@@ -61,8 +58,20 @@ public class Runner {
         int numGames = Integer.parseInt(prop.getProperty("runner.num_games", "1"));
         
         for(int i = 0; i < numGames; i++){
+        	
+        	//determines the trace output file. It is either null or the one calculated from the specified prefix
+    		String traceOutput = null;
+    				
+    		if(prop.containsKey("runner.trace_prefix")){
+    			// finds the file name
+        		traceOutput = FileNameUtil.nextAvailableFileName(
+    				prop.getProperty("runner.trace_prefix"), "trace"
+    			);
+        		
+    		}
+        	
         	Date begin = new Date(System.currentTimeMillis());
-        	int result = headlessMatch(ai1, ai2, settings.getMapLocation(), settings.getMaxCycles(), utt, settings.isPartiallyObservable());
+        	int result = headlessMatch(ai1, ai2, settings, utt, traceOutput);
         	Date end = new Date(System.currentTimeMillis());
         	
         	System.out.print(String.format("\rMatch %8d finished.", i+1));
@@ -89,21 +98,22 @@ public class Runner {
 	}
 	
 	/**
-	 * Runs a match between two AIs, in the specified map and parameters without the GUI.
+	 * Runs a match between two AIs with the specified settings, without the GUI.
+	 * Saves the trace to re-play the match if traceOutput is not null
 	 * @param ai1
 	 * @param ai2
-	 * @param mapFile
-	 * @param timeLimit
+	 * @param config
 	 * @param types
-	 * @param partiallyObservable
+	 * @param traceOutput
+	 * @return
 	 * @throws Exception
 	 */
-    public static int headlessMatch(AI ai1, AI ai2, String mapFile, int timeLimit, UnitTypeTable types, boolean partiallyObservable) throws Exception{
+	public static int headlessMatch(AI ai1, AI ai2, GameSettings config, UnitTypeTable types, String traceOutput) throws Exception{
         PhysicalGameState pgs;
 		try {
-			pgs = PhysicalGameState.load(mapFile, types);
+			pgs = PhysicalGameState.load(config.getMapLocation(), types);
 		} catch (Exception e) {
-			System.err.println("Error while loading map from file: " + mapFile);
+			System.err.println("Error while loading map from file: " + config.getMapLocation());
 			e.printStackTrace();
 			System.err.println("Aborting match execution...");
 			return MATCH_ERROR;
@@ -116,14 +126,14 @@ public class Runner {
         
         boolean gameover = false;
     	
-        while (!gameover && state.getTime() < timeLimit) {
+        while (!gameover && state.getTime() < config.getMaxCycles()) {
         	
         	// initializes state equally for the players 
         	GameState player1State = state; 
         	GameState player2State = state; 
         	
         	// places the fog of war if the state is partially observable
-        	if (partiallyObservable) {
+        	if (config.isPartiallyObservable()) {
         		player1State = new PartiallyObservableGameState(state, 0);
         		player2State = new PartiallyObservableGameState(state, 0);
         	}
@@ -156,20 +166,12 @@ public class Runner {
 		//traces the final state
 		replay.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
 		
-		//writes the trace
-		String output = "/dev/null";
-		Properties prop = ConfigManager.getInstance().getConfig(RUNNER_CONFIG_KEY);
-		
-		if(prop.containsKey("runner.trace_prefix")){
-			// finds the file name
-    		output = FileNameUtil.nextAvailableFileName(
-				prop.getProperty("runner.trace_prefix"), "trace"
-			);
-    		
+		// writes the trace
+		if (traceOutput != null){
+			XMLWriter xml = new XMLWriter(new FileWriter(traceOutput));
+	        replay.toxml(xml);
+	        xml.flush();
 		}
-		XMLWriter xml = new XMLWriter(new FileWriter(output));
-        replay.toxml(xml);
-        xml.flush();
 		
 		return state.winner();
     }

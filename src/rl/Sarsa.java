@@ -97,16 +97,6 @@ public class Sarsa {
      */
     private Map<String,AI> portfolio;
     
-    /**
-     * Constructor that loads parameters according to the MetaBot configuration key
-     * @deprecated
-     * @param portfolio
-     */
-    public Sarsa(Map<String,AI> portfolio){
-        
-        this(portfolio, ConfigManager.getInstance().getConfig(MetaBot.METABOT_CONFIG_KEY));
-    }
-
 	/**
 	 * Loads the parameters from a specific Properties object
 	 * @param portfolio
