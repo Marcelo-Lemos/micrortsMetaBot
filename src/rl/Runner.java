@@ -81,7 +81,7 @@ public class Runner {
         	int result = headlessMatch(ai1, ai2, settings, utt, traceOutput);
         	Date end = new Date(System.currentTimeMillis());
         	
-        	System.out.print(String.format("\rMatch %8d finished.", i+1));
+        	System.out.print(String.format("\rMatch %8d finished with result %3d.", i+1, result));
         	//logger.info(String.format("Match %8d finished.", i+1));
         	
         	long duration = end.getTime() - begin.getTime();
@@ -101,8 +101,8 @@ public class Runner {
         	ai1.reset();
         	ai2.reset();
         }
-        
-        System.out.println("\nExecuted " + numGames + " matches.");
+        System.out.println(); //adds a trailing \n to the match count written in the loop.
+        logger.info("Executed " + numGames + " matches.");
 	}
 	
 	/**
@@ -118,12 +118,13 @@ public class Runner {
 	 */
 	public static int headlessMatch(AI ai1, AI ai2, GameSettings config, UnitTypeTable types, String traceOutput) throws Exception{
         PhysicalGameState pgs;
+        Logger logger = LogManager.getRootLogger();
 		try {
 			pgs = PhysicalGameState.load(config.getMapLocation(), types);
 		} catch (Exception e) {
-			System.err.println("Error while loading map from file: " + config.getMapLocation());
-			e.printStackTrace();
-			System.err.println("Aborting match execution...");
+			logger.error("Error while loading map from file: " + config.getMapLocation(), e);
+			//e.printStackTrace();
+			logger.error("Aborting match execution...");
 			return MATCH_ERROR;
 		}
 
@@ -188,8 +189,11 @@ public class Runner {
     public static void outputSummary(String path, int result, long duration, Date start, Date finish) throws IOException{
     	File f = new File(path);
 		FileWriter writer; 
+		Logger logger = LogManager.getRootLogger();
+		logger.debug("Attempting to write the output summary to {}", path);
 		
     	if(!f.exists()){ // creates a new file and writes the header
+    		logger.debug("File didn't exist, creating and writing header");
     		writer = new FileWriter(f, false); //must be after the test, because it creates the file upon instantiation
     		writer.write("#result,duration(ms),initial_time,final_time\n");
     		writer.close();
@@ -198,6 +202,7 @@ public class Runner {
     	// appends one line with each weight value separated by a comma
     	writer = new FileWriter(f, true); 
     	writer.write(String.format("%d,%d,%s,%s\n", result, duration, start, finish));
+    	logger.debug("Successfully wrote to {}", path);
     	
     	writer.close();
 	}
@@ -243,3 +248,4 @@ public class Runner {
 		return ai;
 	}
 }
+
