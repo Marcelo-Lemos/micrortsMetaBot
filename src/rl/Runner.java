@@ -221,9 +221,12 @@ public class Runner {
 	public static AI loadAI(String aiName, UnitTypeTable utt, int playerNumber, Properties config) throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 		AI ai;
 		
+		Logger logger = LogManager.getRootLogger();
+		logger.info("Loading {}", aiName);
+		
 		// (custom) loads MetaBot with its configuration file
 		if(aiName.equalsIgnoreCase("metabot.MetaBot")) {
-			System.out.println("Loading MetaBot");
+			
 			String configKey = String.format("player%d.config", playerNumber);
 			if(config.containsKey(configKey)){
 				ai = new MetaBot(utt, config.getProperty(configKey));
