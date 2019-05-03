@@ -6,46 +6,58 @@ Sarsa + linear function approximation.
 
 An experiment is executed by running `./rlexperiment.sh configfile` where configfile is a file formatted with Java .properties style.
 
-The listing below shows an example of such a file with the parameters to configure (taken from config/metabot.properties, might be outdated):
+The listing below shows an example of such a file with the parameters to configure (taken from config/microrts.properties, might be outdated). The listing specifies MetaBot as player 1 and NaiveMCTS as player 2. Specific parameters of MetaBot are specified in a separate file. To see how to configure, check the Readme.md at `config/` in this project.
 
 ```
-# specifies the portfolio members
+# STANDALONE = Starts MicroRTS as a standalone instance (No remote agents).
+# GUI = Starts the microRTS GUI.
+# SERVER = Starts MicroRTS as a server instance.
+# CLIENT = Starts MicroRTS as a client instance.
+launch_mode=STANDALONE
 
-portfolio.members = WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks
+### NETWORKING ###
+# Only needed if modes are SERVER/CLIENT
+# server_address=127.0.0.1
+# server_port=9898
+# 1 = XML
+# 2 = JSON
+# serialization_type=2
 
-### the parameters below are related to the reinforcement learning algorithm ###
-# specifies the type of learning agent
-rl.agent = "sarsa"
+# MAP
+map_location=maps/24x24/basesWorkers24x24.xml
 
-# the initial value and decay of exploration rate (epsilon is multiplied by this decay factor after each episode)
-rl.epsilon.initial = 0.1
-rl.epsilon.decay = 1
+# number of games to play
+num_games=1
 
-# the initial value and decay of learning rate (alpha is multiplied by this decay factor after each episode)
-rl.alpha.initial = 0.1
-rl.alpha.decay = 1
+#### GAME SETTINGS ###
 
-# Note: setting the decay rates to 1 makes the parameters constant throughout all episodes
+# The max number of cycles the game will perform.
+max_cycles=3000
 
-# the discount factor
-rl.gamma = 0.9
+# If false, the players have full vision of the map.
+partially_observable=false
 
-# eligibility trace (not used yet)
-rl.lambda = 0
+# Versions of the Unit Type Table (DEFAULT = 2)
+# 1 = original
+# 2 = original finetuned
+# 3 = non-deterministic version of original finetuned (damages are random)
+UTT_version=2
 
-# the feature extractor
-rl.feature.extractor = quadrant_model
+# Conflict policies (DEFAULT = 1)
+# 1 = A conflict resolution policy where move conflicts cancel both moves
+# 2 = A conflict resolution policy where move conflicts are solved randomly
+# 3 = A conflict resolution policy where move conflicts are solved by alternating the units trying to move
+conflict_policy=1
 
-# the map is divided in quadrant_division x quadrant_division quadrants
-# this parameter is specific of the quadrant_model
-rl.feature.extractor.quadrant_division = 3
+# a file to write match results
+runner.output=summary.csv
 
-# the random seed (if not specified, it will load the default seed)
-rl.random.seed = 1
+### STANDALONE Settings ###
+# Only needed if mode is STANDALONE
+# Set which AIs will play
+AI1=metabot.MetaBot
+AI2=ai.mcts.naivemcts.NaiveMCTS
 
-# the prefix of the output file to save weights
-rl.output.binprefix = training/binweights-dryrun
-
-# the prefix of the output file to save weights in human-readable format
-rl.output.humanprefix = training/weights-dryrun
+### metabot settings ###
+player1.config=config/metabot.properties
 ```
