@@ -11,7 +11,7 @@ An experiment is executed by running `./rlexperiment.sh configfile` where config
 
 The listing below shows an example of such a file with the parameters to configure (taken from config/microrts.properties, might be outdated). The listing specifies MetaBot as player 1 and NaiveMCTS as player 2. Specific parameters of MetaBot are specified in a separate file. To see how to configure, check the section below. Note that you can configure MetaBot to play against itself (self-play) by setting both player 1 and 2 as MetaBot. In this case, make sure you specify two different configuration files for each instance of MetaBot so that they write their weights to different paths.
 
-```
+```properties
 # STANDALONE = Starts MicroRTS as a standalone instance (No remote agents).
 # GUI = Starts the microRTS GUI.
 # SERVER = Starts MicroRTS as a server instance.
@@ -69,7 +69,7 @@ player1.config=config/metabot.properties
 
 The listing below is an example of config. file for MetaBot:
 
-```
+```properties
 # specifies the portfolio members
 portfolio.members = WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks
 
