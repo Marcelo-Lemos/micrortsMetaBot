@@ -5,6 +5,12 @@ This is somewhat a refactoring of https://github.com/SivaAnbalagan1/micrortsFA t
 
 We call it MetaBot because it selects an algorithm to play in its behalf at each game frame (instead of searching in the huge action space).
 
+## Configuring the project
+
+After cloning, you must add all jars in `lib/` folder to your classpath (each IDE has an specific way of doing this). Note that `log4j-api-2.11.2-javadoc.jar` must be added as "attached javadoc" for `log4j-api-2.11.2.jar`. 
+
+Note that `microrts.jar` refers to commit `e4238abc` of the project (https://github.com/santiontanon/microrts/commit/e4238abc71c6f042cdf669a2a7e377436b5a042b). To refer to the latest version of microRTS, clone the project and add it as a referenced project to microRTSMetaBot. 
+
 ## Running an experiment
 
 An experiment is executed by running `./rlexperiment.sh configfile` where configfile is a file formatted with Java .properties style.
