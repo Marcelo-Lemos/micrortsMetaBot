@@ -6,7 +6,7 @@
               as the first entry and export the buildfile again. --><project basedir="." default="build" name="micrortsMetaBot">
     <property environment="env"/>
     <property name="junit.output.dir" value="junit"/>
-    <property name="microrts.location" value="../starcraft/microrts"/>
+    <property name="microrts.location" value="../micrortsMetaBot"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
     <property name="source" value="1.8"/>
