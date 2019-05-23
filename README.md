@@ -13,7 +13,7 @@ Note that `microrts.jar` refers to commit `e4238abc` of the project (https://git
 
 ## Running an experiment
 
-An experiment is executed by running `./rlexperiment.sh configfile` where configfile is a file formatted with Java .properties style.
+An experiment is executed by running `./rlexperiment.sh -c configfile` where configfile is a file formatted with Java .properties style.
 
 The listing below shows an example of such a file with the parameters to configure (taken from config/microrts.properties, might be outdated). The listing specifies MetaBot as player 1 and NaiveMCTS as player 2. Specific parameters of MetaBot are specified in a separate file. To see how to configure, check the section below. Note that you can configure MetaBot to play against itself (self-play) by setting both player 1 and 2 as MetaBot. In this case, make sure you specify two different configuration files for each instance of MetaBot so that they write their weights to different paths.
 

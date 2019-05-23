@@ -12,6 +12,7 @@
 
 # Package Files #
 *.jar
+!lib/*.jar
 *.war
 *.nar
 *.ear
@@ -23,3 +24,7 @@
 hs_err_pid*
 /bin/
 /training/
+
+# Eclipse files
+.classpath
+.project
