@@ -71,6 +71,15 @@ AI2=ai.mcts.naivemcts.NaiveMCTS
 player1.config=config/metabot.properties
 ```
 
+## Running repeated experiments
+
+You can execute multiple experiments by running `./repeat-exp.sh -n num` where num is the number of times the experiment will be repeated. Other configuration can also be passed and they will be the same for every execution (e.g. configfile). The only difference between each experiment will be the random seed, which will be equal to the repetition number.
+
+By default the experiments will be run serially, but they can also be run in batches.
+To do so just set the flag `-bs` to the batch size you want.
+
+The directory in which the results will be stored can be specified by setting de `-d` flag.
+
 ## Configuring MetaBot
 
 The listing below is an example of config. file for MetaBot:
