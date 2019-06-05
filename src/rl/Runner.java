@@ -87,9 +87,8 @@ public class Runner {
             prop.setProperty("rl.output.humanprefix", cmd.getOptionValue("h"));
         }
 
-        // Load game settings
+        // Load and shows game settings
         GameSettings settings = GameSettings.loadFromConfig(prop);
-        logger.info("This game's settings:");
         logger.info(settings);
 
         UnitTypeTable utt = new UnitTypeTable(settings.getUTTVersion(), settings.getConflictPolicy());
