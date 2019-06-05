@@ -203,7 +203,7 @@ public class MetaBot extends AI {
         	if(state.winner() == 1-player) reward = -1;
         	else reward = 0;
         }
-        learningAgent.learn(previousState, choice, reward, currentState, state.gameover(), player);
+        learningAgent.learn(previousState, choice, reward, currentState, currentState.gameover(), player);
     	
         // selected is the AI that will perform our action, let's try it:
     	choice = learningAgent.act(state, player);

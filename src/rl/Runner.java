@@ -89,7 +89,8 @@ public class Runner {
 
         // Load game settings
         GameSettings settings = GameSettings.loadFromConfig(prop);
-        System.out.println(settings);
+        logger.info("This game's settings:");
+        logger.info(settings);
 
         UnitTypeTable utt = new UnitTypeTable(settings.getUTTVersion(), settings.getConflictPolicy());
         AI ai1 = loadAI(settings.getAI1(), utt, 1, prop);
