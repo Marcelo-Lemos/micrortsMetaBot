@@ -139,8 +139,40 @@ public class MetaBot extends AI {
         
         reset();
     }
-    
-    
+
+   /**
+     * Saves the weight 'vector' to a file in the specified path
+     * by serializing the weights HashMap.
+     * The file is overridden if already exists.
+     * @param path
+     * @throws IOException
+     */
+    public void saveBin(String path) throws IOException{
+	learningAgent.saveBin(path);
+    }
+
+   /**
+     * Loads the weight 'vector' from a file in the specified path
+     * by de-serializing the weights HashMap
+     * @param path
+     * @throws IOException
+     */
+    public void loadBin(String path) throws IOException{
+	learningAgent.loadBin(path);
+    }
+
+    /**
+     * Saves the weights in human-readable (csv) format. Creates one file
+     * for each portfolio member and appends a line with the weights separated by comma.
+     * The order of weights is as given by weights.get(portfolioMember).values()
+     * 
+     * @param prefix
+     * @throws IOException
+     */
+    public void saveHuman(String prefix) throws IOException{
+	learningAgent.saveHuman(prefix);
+    }
+
     public void preGameAnalysis(GameState gs, long milliseconds) throws Exception {
     }
 
