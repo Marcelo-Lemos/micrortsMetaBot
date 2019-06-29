@@ -44,15 +44,19 @@ public class Runner {
 
     private static final Logger logger = LogManager.getRootLogger();
 
+    private static int expNumber = 0;
+    
     public static void main(String[] args) throws Exception {
 
         // Argument parser
         Options options = new Options();
-        options.addOption("c", "config", true, "config file")
+        /*options.addOption("c", "config", true, "config file")
             .addOption("s", "seed", true, "random seed")
             .addOption("b", "binprefix", true, "binary output file prefix")
-            .addOption("h", "humanprefix", true, "human output file prefix");
-
+            .addOption("h", "humanprefix", true, "human output file prefix");*/
+        options.addOption("c", "config", true, "config file")
+        .addOption("n", "number", true, "experiment number");
+        
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
 
@@ -72,12 +76,16 @@ public class Runner {
         prop = ConfigManager.loadConfig(configFile);
 
         // Update properties with command line arguments
-        if (cmd.hasOption("s")) {
-            logger.debug("Updating seed to {}", cmd.getOptionValue("s"));
-            prop.setProperty("rl.random.seed", cmd.getOptionValue("s"));
+        // Using experiment number as random seed
+        if (cmd.hasOption("n")) {
+            logger.debug("Updating seed to {}", cmd.getOptionValue("n"));
+            prop.setProperty("rl.random.seed", cmd.getOptionValue("n"));
+            
+            expNumber = Integer.parseInt(cmd.getOptionValue("n"));
         }
         
-        if (cmd.hasOption("b")) {
+        // Removed for now
+        /*if (cmd.hasOption("b")) {
             logger.debug("Updating binprefix to {}", cmd.getOptionValue("b"));
             prop.setProperty("rl.output.binprefix", cmd.getOptionValue("b"));
         }
@@ -85,7 +93,7 @@ public class Runner {
         if (cmd.hasOption("h")) {
             logger.debug("Updating humanprefix to {}", cmd.getOptionValue("h"));
             prop.setProperty("rl.output.humanprefix", cmd.getOptionValue("h"));
-        }
+        }*/
 
         // Load and shows game settings
         GameSettings settings = GameSettings.loadFromConfig(prop);
@@ -96,7 +104,7 @@ public class Runner {
         AI ai2 = loadAI(settings.getAI2(), utt, 2, prop);
 
         int numGames = Integer.parseInt(prop.getProperty("runner.num_games", "1"));
-
+	
         for (int i = 0; i < numGames; i++) {
 
             // determines the trace output file. It is either null or the one calculated from the specified prefix
@@ -285,10 +293,10 @@ public class Runner {
 
             String configKey = String.format("player%d.config", playerNumber);
             if(config.containsKey(configKey)){
-                ai = new MetaBot(utt, config.getProperty(configKey));
+                ai = new MetaBot(utt, config.getProperty(configKey),expNumber);
             }
             else {
-                ai = new MetaBot(utt);
+                ai = new MetaBot(utt,expNumber);
             }
 
         } else { // (default) loads the AI according to its name
