@@ -74,9 +74,10 @@ echo "Done."
 echo "Lauching $N_EXPERIMENTS experiment(s)..."
 for i in $(seq 0 $(($N_EXPERIMENTS-1))); do
     ((j=j%"$BATCH_SIZE")); ((j++==0)) && wait
+    WORKING_DIR="rep_$i"
     echo "Lauching experiment $i..."
-    echo "$SCRIPT_PATH" -n "$i" "$CONFIG_PATH" ## For debugging
-    . "$SCRIPT_PATH" -n "$i" "$CONFIG_PATH" >> "$DIR"/rep_"$i"/rep_"$i".log &
+    echo "$SCRIPT_PATH" -n "$i" -d "$WORKING_DIR" "$CONFIG_PATH" ## For debugging
+    . "$SCRIPT_PATH" -n "$i" -d "$WORKING_DIR" "$CONFIG_PATH" >> "$DIR"/"$WORKING_DIR"/"$WORKING_DIR".log &
 done
 wait
 echo "Done."

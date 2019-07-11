@@ -50,12 +50,13 @@ public class Runner {
 
         // Argument parser
         Options options = new Options();
-        /*options.addOption("c", "config", true, "config file")
-            .addOption("s", "seed", true, "random seed")
-            .addOption("b", "binprefix", true, "binary output file prefix")
-            .addOption("h", "humanprefix", true, "human output file prefix");*/
-        options.addOption("c", "config", true, "config file")
-        .addOption("n", "number", true, "experiment number");
+
+        options.addOption("c", "config", true, "config file");
+        options.addOption("n", "number", true, "experiment number");
+        options.addOption("d", "directory", true, "working directory");
+        // options.addOption("s", "seed", true, "random seed");
+        // options.addOption("b", "binprefix", true, "binary output file prefix");
+        // options.addOption("h", "humanprefix", true, "human output file prefix");
         
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
@@ -84,6 +85,11 @@ public class Runner {
             expNumber = Integer.parseInt(cmd.getOptionValue("n"));
         }
         
+        if (cmd.hasOption("d")) {
+            logger.debug("Updating working directory to {}", cmd.getOptionValue("d"));
+            prop.setProperty("rl.workingdir", cmd.getOptionValue("d"));
+        }
+
         // Removed for now
         /*if (cmd.hasOption("b")) {
             logger.debug("Updating binprefix to {}", cmd.getOptionValue("b"));
