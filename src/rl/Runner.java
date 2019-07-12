@@ -45,7 +45,7 @@ public class Runner {
     private static final Logger logger = LogManager.getRootLogger();
 
     private static int expNumber = 0;
-    
+
     public static void main(String[] args) throws Exception {
 
         // Argument parser
@@ -54,10 +54,9 @@ public class Runner {
         options.addOption("c", "config", true, "config file");
         options.addOption("n", "number", true, "experiment number");
         options.addOption("d", "directory", true, "working directory");
-        // options.addOption("s", "seed", true, "random seed");
-        // options.addOption("b", "binprefix", true, "binary output file prefix");
-        // options.addOption("h", "humanprefix", true, "human output file prefix");
-        
+        options.addOption("b", "binprefix", false, "save binary weights");
+        options.addOption("h", "humanprefix", false, "save human weights");
+
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
 
@@ -71,7 +70,7 @@ public class Runner {
             logger.debug("args: " + Arrays.toString(args));
             configFile = "config/microrts.properties";
         }
-        
+
         // Load properties from file
         Properties prop = new Properties();
         prop = ConfigManager.loadConfig(configFile);
@@ -81,25 +80,24 @@ public class Runner {
         if (cmd.hasOption("n")) {
             logger.debug("Updating seed to {}", cmd.getOptionValue("n"));
             prop.setProperty("rl.random.seed", cmd.getOptionValue("n"));
-            
+
             expNumber = Integer.parseInt(cmd.getOptionValue("n"));
         }
-        
+
         if (cmd.hasOption("d")) {
             logger.debug("Updating working directory to {}", cmd.getOptionValue("d"));
             prop.setProperty("rl.workingdir", cmd.getOptionValue("d"));
         }
 
-        // Removed for now
-        /*if (cmd.hasOption("b")) {
-            logger.debug("Updating binprefix to {}", cmd.getOptionValue("b"));
-            prop.setProperty("rl.output.binprefix", cmd.getOptionValue("b"));
+        if (cmd.hasOption("b")) {
+            logger.debug("Setting 'save binary weights' to true", cmd.getOptionValue("b"));
+            prop.setProperty("rl.save_weights_bin", "true");
         }
-        
+
         if (cmd.hasOption("h")) {
-            logger.debug("Updating humanprefix to {}", cmd.getOptionValue("h"));
-            prop.setProperty("rl.output.humanprefix", cmd.getOptionValue("h"));
-        }*/
+            logger.debug("Setting 'save human weights' to true", cmd.getOptionValue("h"));
+            prop.setProperty("rl.save_weights_human", "true");
+        }
 
         // Load and shows game settings
         GameSettings settings = GameSettings.loadFromConfig(prop);
@@ -110,12 +108,12 @@ public class Runner {
         AI ai2 = loadAI(settings.getAI2(), utt, 2, prop);
 
         int numGames = Integer.parseInt(prop.getProperty("runner.num_games", "1"));
-	
+
         for (int i = 0; i < numGames; i++) {
 
             // determines the trace output file. It is either null or the one calculated from the specified prefix
             String traceOutput = null;
-        
+
             if (prop.containsKey("runner.trace_prefix")) {
                 // finds the file name
                 traceOutput = FileNameUtil.nextAvailableFileName(
@@ -181,7 +179,7 @@ public class Runner {
 
         // creates the trace logger
         Trace replay = new Trace(types);
-        
+
         boolean gameover = false;
 
         while (!gameover && state.getTime() < config.getMaxCycles()) {
@@ -260,7 +258,7 @@ public class Runner {
 
         writer.close();
     }
-    
+
     /**
      * Loads an {@link AI} according to its name, using the provided UnitTypeTable.
      * If the AI is {@link MetaBot}, loads it with the configuration file specified in
