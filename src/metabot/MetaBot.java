@@ -61,16 +61,13 @@ public class MetaBot extends AI {
     double reward;
     // END-- variables to feed the learning agent
 
-    private int expNumber;
-
-
     /**
      * Initializes MetaBot with default configurations
      * @param utt
      */
-    public MetaBot(UnitTypeTable utt, int expNumber) {
+    public MetaBot(UnitTypeTable utt) {
         // calls the other constructor, specifying the default config file
-        this(utt, "metabot.properties", expNumber);
+        this(utt, "metabot.properties");
     }
 
     /**
@@ -78,7 +75,7 @@ public class MetaBot extends AI {
      * @param utt
      * @param configPath
      */
-    public MetaBot(UnitTypeTable utt, String configPath, int expNumber){
+    public MetaBot(UnitTypeTable utt, String configPath){
         myUnitTypeTable = utt;
 
         logger = LogManager.getLogger(MetaBot.class);
@@ -128,9 +125,6 @@ public class MetaBot extends AI {
 
         // creates the learning agent with the specified portfolio and loaded parameters
         learningAgent = new Sarsa(portfolio, config);
-
-        this.expNumber = expNumber;
-
 
         if (config.containsKey("rl.bin_input")) {
             try {
@@ -338,7 +332,7 @@ public class MetaBot extends AI {
 
     public AI clone() {
         //FIXME copy features, weights and other attributes!
-        return new MetaBot(myUnitTypeTable, expNumber);
+        return new MetaBot(myUnitTypeTable);
     }
 
 

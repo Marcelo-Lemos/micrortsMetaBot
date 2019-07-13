@@ -44,8 +44,6 @@ public class Runner {
 
     private static final Logger logger = LogManager.getRootLogger();
 
-    private static int expNumber = 0;
-
     public static void main(String[] args) throws Exception {
 
         // Argument parser
@@ -80,8 +78,6 @@ public class Runner {
         if (cmd.hasOption("n")) {
             logger.debug("Updating seed to {}", cmd.getOptionValue("n"));
             prop.setProperty("rl.random.seed", cmd.getOptionValue("n"));
-
-            expNumber = Integer.parseInt(cmd.getOptionValue("n"));
         }
 
         if (cmd.hasOption("d")) {
@@ -297,10 +293,10 @@ public class Runner {
 
             String configKey = String.format("player%d.config", playerNumber);
             if(config.containsKey(configKey)){
-                ai = new MetaBot(utt, config.getProperty(configKey),expNumber);
+                ai = new MetaBot(utt, config.getProperty(configKey));
             }
             else {
-                ai = new MetaBot(utt,expNumber);
+                ai = new MetaBot(utt);
             }
 
         } else { // (default) loads the AI according to its name
