@@ -42,8 +42,8 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 		
 		// adds the 'global' features
 		features.put(FeatureNames.RESOURCES_OWN, new Feature(FeatureNames.RESOURCES_OWN, 0, 0, 20));
-		features.put(FeatureNames.RESOURCES_OPP, new Feature(FeatureNames.RESOURCES_OWN, 0, 0, 20));
-		features.put(FeatureNames.GAME_TIME, new Feature(FeatureNames.RESOURCES_OWN, 0, 0, 20));
+		features.put(FeatureNames.RESOURCES_OPP, new Feature(FeatureNames.RESOURCES_OPP, 0, 0, 20));
+		features.put(FeatureNames.GAME_TIME, new Feature(FeatureNames.GAME_TIME, 0, 0, 20));
 		features.put(FeatureNames.BIAS, new Feature(FeatureNames.BIAS, 1, 0, 1));
 		
 		// adds the 'per-quadrant' features 
