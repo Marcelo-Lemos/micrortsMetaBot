@@ -70,6 +70,43 @@ public class MetaBot extends AI {
         this(utt, "metabot.properties");
     }
 
+        /**
+     * Initializes MetaBot, loading the configurations from properties
+     * @param utt
+     * @param metaBotConfig
+     */
+    public MetaBot(UnitTypeTable utt, Properties metaBotConfig) {
+        myUnitTypeTable = utt;
+        config = metaBotConfig;
+
+        logger = LogManager.getLogger(MetaBot.class);
+
+        // Loads the configuration
+        String members = config.getProperty("portfolio.members");
+
+        if (members == null) {
+            // logger.error("Error while loading configuration from '" + configPath+ "'. Using defaults.", e);
+            members = "WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks";
+        }
+
+        setupPortifolio(members);
+
+        // Creates the learning agent with the specified portfolio and loaded parameters
+        learningAgent = new Sarsa(portfolio, config);
+
+        if (config.containsKey("rl.bin_input")) {
+            try {
+                learningAgent.loadBin(config.getProperty("rl.bin_input"));
+            } catch (IOException e) {
+                logger.error("Error while loading weights from " + config.getProperty("rl.input"), e);
+                logger.error("Weights initialized randomly.");
+                e.printStackTrace();
+            }
+        }
+
+        reset();
+    }
+
     /**
      * Initializes MetaBot, loading the configurations from the specified file
      * @param utt
@@ -91,37 +128,7 @@ public class MetaBot extends AI {
             members = "WorkerRush, LightRush, RangedRush, HeavyRush, Expand, BuildBarracks";
         }
 
-        String[] memberNames = members.split(",");
-        logger.trace("Portfolio members: ", String.join(",", memberNames));
-
-        //loads the portfolio according to the file specification
-        portfolio = new HashMap<>();
-
-        //TODO get rid of this for-switch and do something like https://stackoverflow.com/a/6094609/1251716
-        for(String name : memberNames ){
-            name = name.trim();
-
-            if(name.equalsIgnoreCase("WorkerRush")){
-                portfolio.put("WorkerRush", new WorkerRush (utt));
-            }
-            else if(name.equalsIgnoreCase("LightRush")){
-                portfolio.put("LightRush", new LightRush (utt));
-            }
-            else if(name.equalsIgnoreCase("RangedRush")){
-                portfolio.put("RangedRush", new RangedRush (utt));
-            }
-            else if(name.equalsIgnoreCase("HeavyRush")){
-                portfolio.put("HeavyRush", new HeavyRush (utt));
-            }
-            else if(name.equalsIgnoreCase("Expand")){
-                portfolio.put("Expand", new Expand (utt));
-            }
-            else if(name.equalsIgnoreCase("BuildBarracks")){
-                portfolio.put("BuildBarracks", new BuildBarracks (utt));
-            }
-
-            else throw new RuntimeException("Unknown portfolio member '" + name +"'");
-        }
+        setupPortifolio(members);
 
         // creates the learning agent with the specified portfolio and loaded parameters
         learningAgent = new Sarsa(portfolio, config);
@@ -185,6 +192,40 @@ public class MetaBot extends AI {
     // public void loadBin(String path) throws IOException {
     //     learningAgent.loadBin(path);
     // }
+
+    private void setupPortifolio(String members) {
+        String[] memberNames = members.split(",");
+        logger.trace("Portfolio members: ", String.join(",", memberNames));
+
+        //loads the portfolio according to the file specification
+        portfolio = new HashMap<>();
+
+        //TODO get rid of this for-switch and do something like https://stackoverflow.com/a/6094609/1251716
+        for(String name : memberNames ){
+            name = name.trim();
+
+            if(name.equalsIgnoreCase("WorkerRush")){
+                portfolio.put("WorkerRush", new WorkerRush (myUnitTypeTable));
+            }
+            else if(name.equalsIgnoreCase("LightRush")){
+                portfolio.put("LightRush", new LightRush (myUnitTypeTable));
+            }
+            else if(name.equalsIgnoreCase("RangedRush")){
+                portfolio.put("RangedRush", new RangedRush (myUnitTypeTable));
+            }
+            else if(name.equalsIgnoreCase("HeavyRush")){
+                portfolio.put("HeavyRush", new HeavyRush (myUnitTypeTable));
+            }
+            else if(name.equalsIgnoreCase("Expand")){
+                portfolio.put("Expand", new Expand (myUnitTypeTable));
+            }
+            else if(name.equalsIgnoreCase("BuildBarracks")){
+                portfolio.put("BuildBarracks", new BuildBarracks (myUnitTypeTable));
+            }
+
+            else throw new RuntimeException("Unknown portfolio member '" + name +"'");
+        }
+    }
 
     public void preGameAnalysis(GameState gs, long milliseconds) throws Exception {
 

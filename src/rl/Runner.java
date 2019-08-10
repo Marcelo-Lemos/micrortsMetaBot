@@ -49,11 +49,20 @@ public class Runner {
         // Argument parser
         Options options = new Options();
 
+        // Runner command line options
         options.addOption("c", "config", true, "config file");
-        options.addOption("n", "number", true, "experiment number");
-        options.addOption("d", "directory", true, "working directory");
-        options.addOption("b", "binprefix", false, "save binary weights");
-        options.addOption("h", "humanprefix", false, "save human weights");
+
+        // Player 1 command line options
+        options.addOption("s1", "seed1", true, "player 1 seed number");
+        options.addOption("d1", "directory1", true, "player 1 working directory");
+        options.addOption("b1", "binprefix1", false, "player 1 save binary weights");
+        options.addOption("h1", "humanprefix1", false, "player 1 save human weights");
+
+        // Player 2 command line options
+        options.addOption("s2", "seed2", true, "player 2 seed number");
+        options.addOption("d2", "directory2", true, "player 2 working directory");
+        options.addOption("b2", "binprefix2", false, "player 2 save binary weights");
+        options.addOption("h2", "humanprefix2", false, "player 2 save human weights");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
@@ -73,35 +82,13 @@ public class Runner {
         Properties prop = new Properties();
         prop = ConfigManager.loadConfig(configFile);
 
-        // Update properties with command line arguments
-        // Using experiment number as random seed
-        if (cmd.hasOption("n")) {
-            logger.debug("Updating seed to {}", cmd.getOptionValue("n"));
-            prop.setProperty("rl.random.seed", cmd.getOptionValue("n"));
-        }
-
-        if (cmd.hasOption("d")) {
-            logger.debug("Updating working directory to {}", cmd.getOptionValue("d"));
-            prop.setProperty("rl.workingdir", cmd.getOptionValue("d"));
-        }
-
-        if (cmd.hasOption("b")) {
-            logger.debug("Setting 'save binary weights' to true", cmd.getOptionValue("b"));
-            prop.setProperty("rl.save_weights_bin", "true");
-        }
-
-        if (cmd.hasOption("h")) {
-            logger.debug("Setting 'save human weights' to true", cmd.getOptionValue("h"));
-            prop.setProperty("rl.save_weights_human", "true");
-        }
-
         // Load and shows game settings
         GameSettings settings = GameSettings.loadFromConfig(prop);
         logger.info(settings);
 
         UnitTypeTable utt = new UnitTypeTable(settings.getUTTVersion(), settings.getConflictPolicy());
-        AI ai1 = loadAI(settings.getAI1(), utt, 1, prop);
-        AI ai2 = loadAI(settings.getAI2(), utt, 2, prop);
+        AI ai1 = loadAI(settings.getAI1(), utt, 1, prop, cmd);
+        AI ai2 = loadAI(settings.getAI2(), utt, 2, prop, cmd);
 
         int numGames = Integer.parseInt(prop.getProperty("runner.num_games", "1"));
 
@@ -275,7 +262,8 @@ public class Runner {
             String aiName,
             UnitTypeTable utt,
             int playerNumber,
-            Properties config
+            Properties config,
+            CommandLine cmd
             ) throws NoSuchMethodException,
             SecurityException,
             ClassNotFoundException,
@@ -293,7 +281,45 @@ public class Runner {
 
             String configKey = String.format("player%d.config", playerNumber);
             if(config.containsKey(configKey)){
-                ai = new MetaBot(utt, config.getProperty(configKey));
+                String configPath = config.getProperty(configKey);
+                Properties metaBotConfig;
+                try {
+                    // Load Metabot config file
+                    metaBotConfig = ConfigManager.loadConfig(configPath);
+
+                    // Update config with command line arguments
+                    String opt = String.format("s%d", playerNumber);
+                    if (cmd.hasOption(opt)) {
+                        String value = cmd.getOptionValue(opt);
+                        logger.debug("Updating player {} seed to {}", playerNumber, value);
+                        metaBotConfig.setProperty("rl.random.seed", value);
+                    }
+                    
+                    opt = String.format("d%d", playerNumber);
+                    if (cmd.hasOption("d")) {
+                        String value = cmd.getOptionValue(opt);
+                        logger.debug("Updating player {} working directory to {}", playerNumber, value);
+                        metaBotConfig.setProperty("rl.workingdir", value);
+                    }
+
+                    opt = String.format("b%d", playerNumber);
+                    if (cmd.hasOption("b")) {
+                        logger.info("Setting player {} 'save binary weights' to true", playerNumber, cmd.getOptionValue(opt));
+                        metaBotConfig.setProperty("rl.save_weights_bin", "true");
+                    }
+
+                    opt = String.format("h%d", playerNumber);
+                    if (cmd.hasOption("h")) {
+                        logger.debug("Setting player {} 'save human weights' to true", playerNumber, cmd.getOptionValue(opt));
+                        metaBotConfig.setProperty("rl.save_weights_human", "true");
+                    }
+
+                    // Load AI
+                    ai = new MetaBot(utt, metaBotConfig);
+                } catch (IOException e) {
+                    logger.error("Error while loading configuration from '" + configPath + "'. Using defaults.", e);
+                    ai = new MetaBot(utt);
+                }
             }
             else {
                 ai = new MetaBot(utt);
