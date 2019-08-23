@@ -51,6 +51,7 @@ public class Runner {
 
         // Runner command line options
         options.addOption("c", "config", true, "config file");
+        options.addOption("o", "output", true, "output file");
 
         // Player 1 command line options
         options.addOption("s1", "seed1", true, "player 1 seed number");
@@ -81,6 +82,11 @@ public class Runner {
         // Load properties from file
         Properties prop = new Properties();
         prop = ConfigManager.loadConfig(configFile);
+
+        if (cmd.hasOption("o")) {
+            logger.debug("Outputting to {}", cmd.getOptionValue("o"));
+            prop.setProperty("runner.output", cmd.getOptionValue("o"));
+        }
 
         // Load and shows game settings
         GameSettings settings = GameSettings.loadFromConfig(prop);
@@ -296,20 +302,20 @@ public class Runner {
                     }
                     
                     opt = String.format("d%d", playerNumber);
-                    if (cmd.hasOption("d")) {
+                    if (cmd.hasOption(opt)) {
                         String value = cmd.getOptionValue(opt);
                         logger.debug("Updating player {} working directory to {}", playerNumber, value);
                         metaBotConfig.setProperty("rl.workingdir", value);
                     }
 
                     opt = String.format("b%d", playerNumber);
-                    if (cmd.hasOption("b")) {
+                    if (cmd.hasOption(opt)) {
                         logger.info("Setting player {} 'save binary weights' to true", playerNumber, cmd.getOptionValue(opt));
                         metaBotConfig.setProperty("rl.save_weights_bin", "true");
                     }
 
                     opt = String.format("h%d", playerNumber);
-                    if (cmd.hasOption("h")) {
+                    if (cmd.hasOption(opt)) {
                         logger.debug("Setting player {} 'save human weights' to true", playerNumber, cmd.getOptionValue(opt));
                         metaBotConfig.setProperty("rl.save_weights_human", "true");
                     }
