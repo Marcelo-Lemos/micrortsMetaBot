@@ -58,12 +58,14 @@ public class Runner {
         options.addOption("d1", "directory1", true, "player 1 working directory");
         options.addOption("b1", "binprefix1", false, "player 1 save binary weights");
         options.addOption("h1", "humanprefix1", false, "player 1 save human weights");
+        options.addOption("bi1", "bininput1", true, "player 1 binary input");
 
         // Player 2 command line options
         options.addOption("s2", "seed2", true, "player 2 seed number");
         options.addOption("d2", "directory2", true, "player 2 working directory");
         options.addOption("b2", "binprefix2", false, "player 2 save binary weights");
         options.addOption("h2", "humanprefix2", false, "player 2 save human weights");
+        options.addOption("bi2", "bininput2", true, "player 2 binary input");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
@@ -318,6 +320,13 @@ public class Runner {
                     if (cmd.hasOption(opt)) {
                         logger.debug("Setting player {} 'save human weights' to true", playerNumber, cmd.getOptionValue(opt));
                         metaBotConfig.setProperty("rl.save_weights_human", "true");
+                    }
+
+                    opt = String.format("bi%d", playerNumber);
+                    if (cmd.hasOption(opt)) {
+                        String value = cmd.getOptionValue(opt);
+                        logger.info("Setting player {} binary input to {}", playerNumber, value);
+                        metaBotConfig.setProperty("rl.bin_input", value);
                     }
 
                     // Load AI
