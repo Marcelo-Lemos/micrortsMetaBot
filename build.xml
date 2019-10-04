@@ -16,6 +16,8 @@
         <pathelement location="bin"/>
         <pathelement location="lib/jdom.jar"/>
         <pathelement location="lib/microrts.jar"/>
+    	<pathelement location="lib/ufv.jar"/>
+    	<pathelement location="lib/commons-cli-1.4.jar"/>
         <pathelement location="lib/log4j-api-2.11.2.jar"/>
     	<pathelement location="lib/log4j-core-2.11.1.jar"/>
         <path refid="JUnit 4.libraryclasspath"/>
