@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,13 +27,7 @@ import rts.PlayerAction;
 import rts.Trace;
 import rts.TraceEntry;
 import rts.units.UnitTypeTable;
-import util.XMLWriter;
 import utils.FileNameUtil;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
 
 /**
  * A class to run microRTS games to train and test MetaBot
@@ -108,7 +106,7 @@ public class Runner {
             if (prop.containsKey("runner.trace_prefix")) {
                 // finds the file name
                 traceOutput = FileNameUtil.nextAvailableFileName(
-                    prop.getProperty("runner.trace_prefix"), "trace"
+                    prop.getProperty("runner.trace_prefix"), "trace.zip"
                 );
             }
 
@@ -213,12 +211,23 @@ public class Runner {
         //traces the final state
         replay.addEntry(new TraceEntry(state.getPhysicalGameState().clone(), state.getTime()));
 
-        // writes the trace
-        if (traceOutput != null) {
-            XMLWriter xml = new XMLWriter(new FileWriter(traceOutput));
-            replay.toxml(xml);
-            xml.flush();
-        }
+        // writes the trace (replay)
+        if (traceOutput != null){
+			// creates missing parent directories if needed
+			File f = new File(traceOutput);
+    		if (f.getParentFile() != null) {
+    			  f.getParentFile().mkdirs();
+			}
+    		
+    		// ensures that traceOutput ends with a .zip
+    		if (! traceOutput.endsWith(".zip")) {
+    			traceOutput += ".zip";
+    		}
+    		
+    		// writes the zipped trace file (much smaller)
+    		replay.toZip(traceOutput);
+    		
+		}
 
         return state.winner();
     }
