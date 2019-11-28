@@ -15,11 +15,9 @@ import java.util.Properties;
 import java.util.Random;
 
 import ai.core.AI;
-import config.ConfigManager;
 import features.Feature;
 import features.FeatureExtractor;
 import features.QuadrantModelFeatureExtractor;
-import metabot.MetaBot;
 import rts.GameState;
 
 /**
@@ -133,12 +131,10 @@ public class Sarsa {
      */
     public void initializeWeights(GameState state){
     	weights = new HashMap<>();
-    	
     	for(String aiName : portfolio.keySet()){
 	    	Map<String, Float> aiWeights = new HashMap<>();
 	    	
 	    	for (String featureName : featureExtractor.getFeatureNames(state)){
-	    		
 	    		// weights are initialized randomly within [-1, 1]
 	    		aiWeights.put(featureName, random.nextFloat()*2 - 1);
 	    	}
@@ -280,7 +276,7 @@ public class Sarsa {
     private double dotProduct(Map<String,Feature> features, Map<String, Float> weights){
     	float product = 0.0f;
     	for(String featureName : features.keySet()){
-    		product += features.get(featureName).getValue() * weights.get(featureName);
+    		product += features.get(featureName).getValue() * weights.get(featureName); 
     	}
     	return product;
     }
