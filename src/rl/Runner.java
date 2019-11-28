@@ -69,13 +69,12 @@ public class Runner {
         CommandLine cmd = parser.parse(options, args);
 
         String configFile;
-
         if (cmd.hasOption("c")) {
-            logger.debug("Loading experiment configuration from {}", cmd.getOptionValue("c"));
+            logger.info("Loading experiment configuration from {}", cmd.getOptionValue("c"));
             configFile = cmd.getOptionValue("c");
         } else {
-            logger.debug("Input not specified, reading from 'config/microrts.properties'");
-            logger.debug("args: " + Arrays.toString(args));
+            logger.info("Input not specified, reading from 'config/microrts.properties'");
+            logger.info("args: " + Arrays.toString(args));
             configFile = "config/microrts.properties";
         }
 
