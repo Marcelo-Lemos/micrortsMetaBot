@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Parameters:
+# -n|--number-experiments
+# -bs|--batch-size (how many to run in parallel)
+# -d|--directory (base where results will be saved)
+# -c|--config (experiment config)
+# -b|--save-bin (where to save weights -- shouldn't it be inside -d?)
+# -bi|--bin-input (where to load weights from)
+
 SCRIPT_PATH=rlexperiment.sh
 
 DEFAULT_DIR="experiments"
