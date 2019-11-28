@@ -31,7 +31,7 @@ public class TestQuadrantModelFeatureExtractor {
 		 * - Create an instance of microRTS GameState, loading the map you stored.
 		 * - The feature extractor must extract 130 features (that's the length we'll test)
 		 * - Within the set of features, you must find the following names:
-		 * -- "resorces_own", "resources_opp", "game_time", "bias" (as per the FeatureNames class)
+		 * -- "resources_own", "resources_opp", "game_time", "bias" (as per the FeatureNames class)
 		 * 
 		 * - Moreover, we must test the existence of feature names with the following pattern:
 		 * -- "unit_count-x-y-p-t", where: 
@@ -47,7 +47,7 @@ public class TestQuadrantModelFeatureExtractor {
 		UnitTypeTable types = new UnitTypeTable(UnitTypeTable.VERSION_ORIGINAL_FINETUNED);
 		GameState state = null;
 		try {
-			state = new GameState(PhysicalGameState.load("basesWorkers24x24.xml", types),types);
+			state = new GameState(PhysicalGameState.load("maps/24x24/basesWorkers24x24.xml", types),types);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Failed to load game state");
@@ -57,8 +57,9 @@ public class TestQuadrantModelFeatureExtractor {
 		
 		Set<String> featureNames = featureExtractor.getFeatureNames(state);
 		
-		assertEquals(130, featureNames.size());
 		assertTrue(featureNames.contains("resources_own"));
+		assertEquals(130, featureNames.size()); //is giving 148
+		
 		
 		fail("Not yet implemented"); // TODO
 	}
