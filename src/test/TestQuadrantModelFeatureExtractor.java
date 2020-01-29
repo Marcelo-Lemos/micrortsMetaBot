@@ -47,7 +47,7 @@ public class TestQuadrantModelFeatureExtractor {
 		UnitTypeTable types = new UnitTypeTable(UnitTypeTable.VERSION_ORIGINAL_FINETUNED);
 		GameState state = null;
 		try {
-			state = new GameState(PhysicalGameState.load("maps/24x24/basesWorkers24x24.xml", types),types);
+			state = new GameState(PhysicalGameState.load("maps/test/basesWorkers24x24.xml", types),types);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Failed to load game state");
