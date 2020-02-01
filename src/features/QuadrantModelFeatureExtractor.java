@@ -1,8 +1,10 @@
 package features;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,6 +69,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 					
 					// the fourth for traverses the unit types
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){
+						if (type.isResource) continue; //ignores resources
 						String countFeatName = FeatureNames.unitsOfTypePerQuad(horizQuad, vertQuad, player, type);
 						features.put(countFeatName, new Feature(countFeatName, 0, 0, tilesPerQuadrant));
 					}
@@ -77,8 +80,8 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 		return features;
 	}
 	
-	public Set<String> getFeatureNames(GameState state){
-		Set<String> featureNames = new HashSet<>();
+	public List<String> getFeatureNames(GameState state){
+		List<String> featureNames = new ArrayList<>();
 		
 		// weights are initialized randomly within [-1, 1]
 		featureNames.add(FeatureNames.RESOURCES_OWN);
@@ -100,6 +103,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 					
 					// the fourth for traverses the unit types
 					for(UnitType type : state.getUnitTypeTable().getUnitTypes()){
+						if (type.isResource) continue; //ignores resources
 						String countFeatName = FeatureNames.unitsOfTypePerQuad(horizQuad, vertQuad, player, type);
 						featureNames.add(countFeatName);
 					}

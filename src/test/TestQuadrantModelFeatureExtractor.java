@@ -1,14 +1,16 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
-import org.jdom.JDOMException;
 import org.junit.Before;
 import org.junit.Test;
 
+import features.Feature;
 import features.QuadrantModelFeatureExtractor;
 import rts.GameState;
 import rts.PhysicalGameState;
@@ -55,10 +57,9 @@ public class TestQuadrantModelFeatureExtractor {
 		
 		QuadrantModelFeatureExtractor featureExtractor = new QuadrantModelFeatureExtractor(3);
 		
-		Set<String> featureNames = featureExtractor.getFeatureNames(state);
-		
+		List<String> featureNames = featureExtractor.getFeatureNames(state);
 		assertTrue(featureNames.contains("resources_own"));
-		assertEquals(130, featureNames.size()); //is giving 148
+		assertEquals(130, featureNames.size()); //is giving 130
 		
 		
 		fail("Not yet implemented"); // TODO
@@ -77,6 +78,19 @@ public class TestQuadrantModelFeatureExtractor {
 		 * Manually count the feature values and check whether the 
 		 * feature extractor is loading them correctly
 		 */
+		UnitTypeTable types = new UnitTypeTable(UnitTypeTable.VERSION_ORIGINAL_FINETUNED);
+		GameState state = null;
+		try {
+			state = new GameState(PhysicalGameState.load("maps/test/basesWorkers24x24.xml", types),types);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Failed to load game state");
+		}
+		
+		QuadrantModelFeatureExtractor featureExtractor = new QuadrantModelFeatureExtractor(3);
+		
+		Map<String, Feature> features = featureExtractor.getFeatures(state, 0);
+		assertEquals(130, features.size()); 
 		fail("Not yet implemented"); // TODO
 	}
 

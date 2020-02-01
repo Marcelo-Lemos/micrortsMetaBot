@@ -1,7 +1,7 @@
 package features;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import rts.GameState;
 
@@ -17,14 +17,14 @@ public abstract class FeatureExtractor {
 	public abstract Map<String, Feature> getRawFeatures(GameState state, int player); 
 	
 	/**
-	 * Returns the set of feature names for this model.
+	 * Returns the list of feature names for this model.
 	 * Requires the game state because some features depend on specific map
 	 * characteristics.
 	 * 
 	 * @param state
 	 * @return
 	 */
-	public abstract Set<String> getFeatureNames(GameState state);
+	public abstract List<String> getFeatureNames(GameState state);
 	
 	/**
 	 * Returns the features associated with a {@link GameState} from the point
