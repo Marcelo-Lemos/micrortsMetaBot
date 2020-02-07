@@ -3,10 +3,8 @@ package features;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import rts.GameState;
 import rts.units.Unit;
@@ -45,7 +43,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 		// adds the 'global' features
 		features.put(FeatureNames.RESOURCES_OWN, new Feature(FeatureNames.RESOURCES_OWN, 0, 0, 20));
 		features.put(FeatureNames.RESOURCES_OPP, new Feature(FeatureNames.RESOURCES_OPP, 0, 0, 20));
-		features.put(FeatureNames.GAME_TIME, new Feature(FeatureNames.GAME_TIME, 0, 0, 20));
+		features.put(FeatureNames.GAME_TIME, new Feature(FeatureNames.GAME_TIME, 0, 0, 12000)); 
 		features.put(FeatureNames.BIAS, new Feature(FeatureNames.BIAS, 1, 0, 1));
 		
 		// adds the 'per-quadrant' features 
@@ -135,8 +133,8 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
 				int unitCount[] = new int[2];
 				
 				// a collection of units in this quadrant:
-				Collection<Unit> unitsInQuad = state.getPhysicalGameState().getUnitsAround(
-					horizQuad*horizQuadLength, vertQuad*vertQuadLength, horizQuadLength
+				Collection<Unit> unitsInQuad = state.getPhysicalGameState().getUnitsInRectangle(
+					horizQuad*horizQuadLength, vertQuad*vertQuadLength, horizQuadLength, vertQuadLength
 				);
 				
 				// initializes the unit count of each type and player as zero
