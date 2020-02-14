@@ -283,7 +283,8 @@ public class MetaBot extends AI {
 
         // makes the learning agent learn
         previousState = currentState;
-        currentState = state;
+        currentState = state.clone();
+        if (previousState != null)
         reward = 0;
         if (state.gameover()){
             if(state.winner() == player) reward = 1;
