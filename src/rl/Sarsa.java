@@ -215,14 +215,22 @@ public class Sarsa {
     		return; 
     	}
     	
-    	// determines the next choice
-    	nextChoice = epsilonGreedy(nextState, player);
-    	
-    	// applies the update rule with s, a, r, s', a'
-        sarsaLearning(
-    		state, choice.getClass().getSimpleName(), reward, 
-    		nextState, nextChoice.getClass().getSimpleName(), player
-    	);
+    	if (!done) {
+	    	// determines the next choice
+	    	nextChoice = epsilonGreedy(nextState, player);
+	    	
+	    	// applies the update rule with s, a, r, s', a'
+	        sarsaLearning(
+	    		state, choice.getClass().getSimpleName(), reward, 
+	    		done, nextState, nextChoice.getClass().getSimpleName(), player
+	    	);
+    	}
+    	else {
+    		sarsaLearning(
+	    		state, choice.getClass().getSimpleName(), reward, 
+	    		done, null, null, player
+	    	);
+    	}
         
         
         if (done){
@@ -246,15 +254,23 @@ public class Sarsa {
      * @param nextChoice a' in Sarsa equation
      * @param player required to extract the features for the states
      */
-    private void sarsaLearning(GameState state, String choice, double reward, GameState nextState, String nextChoice, int player){
+    private void sarsaLearning(GameState state, String choice, double reward, boolean done, GameState nextState, String nextChoice, int player){
     	// checks if s' and a' are ok (s and a will always be ok, we hope)
-    	if(nextState == null || nextChoice == null) return;
+    	//if(nextState == null || nextChoice == null) return;
     	
     	Map<String, Feature> stateFeatures = featureExtractor.getFeatures(state, player);
-    	Map<String, Feature> nextStateFeatures = featureExtractor.getFeatures(nextState, player);
+    	
+    	double futureQ;
+    	if (done) {
+    		futureQ = 0;
+    	}
+    	else {
+    		Map<String, Feature> nextStateFeatures = featureExtractor.getFeatures(nextState, player);
+    		futureQ = qValue(nextStateFeatures, nextChoice);
+    	}
     	
     	double q = qValue(stateFeatures, choice);
-    	double futureQ = qValue(nextStateFeatures, nextChoice);
+    	
     	
     	//the temporal-difference error (delta in Sarsa equation)
     	double delta = reward + gamma * futureQ - q;

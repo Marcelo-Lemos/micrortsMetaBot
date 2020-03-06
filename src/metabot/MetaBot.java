@@ -316,7 +316,7 @@ public class MetaBot extends AI {
         else if (winner == myPlayerNumber) reward = 1; //I won
         else reward = -1; //I lost
 
-        learningAgent.learn(previousState, choice, reward, currentState, true, myPlayerNumber);
+        learningAgent.learn(currentState, choice, reward, null, true, myPlayerNumber);
 
         // tests whether the output prefix has been specified to save the weights (binary)
         // if (config.containsKey("rl.output.binprefix")) {
