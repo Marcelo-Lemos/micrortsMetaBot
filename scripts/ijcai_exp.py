@@ -118,7 +118,7 @@ def specific_experiment(adversary, seed, output):
 def nemesis_experiment(adversary, seed, output):
     logger = logging.getLogger(f'Nemesis - {adversary} {seed}')
 
-    working_dir = f'{output}/specific/{adversary}/rep_{seed}'
+    working_dir = f'{output}/nemesis/{adversary}/rep_{seed}'
     create_dirs(working_dir)
 
     # PuppetMCTS training
