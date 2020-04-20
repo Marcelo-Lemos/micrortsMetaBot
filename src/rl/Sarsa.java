@@ -187,6 +187,7 @@ public class Sarsa {
         if (weights == null) {
             float weightsMin;
             float weightsMax;
+
             switch (weightInitMethod) {
                 case "fixed_interval":
                     // TODO: remove magic numbers
@@ -202,9 +203,7 @@ public class Sarsa {
                     throw new RuntimeException("Invalid weight initialization method: " + weightInitMethod);
             }
 
-            System.out.println("Interval: ("+ weightsMin + ", " + weightsMax + ")");
             initializeWeights(portfolio.keySet(), featureExtractor.getFeatureNames(state), weightsMin, weightsMax);
-            System.out.println(weights);
         }
         // will choose the action for this state
         String choiceName = null;
