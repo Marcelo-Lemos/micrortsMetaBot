@@ -11,6 +11,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import ai.PassiveAI;
 import ai.abstraction.HeavyRush;
 import ai.abstraction.LightRush;
 import ai.abstraction.RangedRush;
@@ -222,6 +223,9 @@ public class MetaBot extends AI {
             else if(name.equalsIgnoreCase("BuildBarracks")){
                 portfolio.put("BuildBarracks", new BuildBarracks (myUnitTypeTable));
             }
+            else if(name.equalsIgnoreCase("PassiveAI")) {
+                portfolio.put("PassiveAI", new PassiveAI(myUnitTypeTable));
+            }
 
             else throw new RuntimeException("Unknown portfolio member '" + name +"'");
         }
@@ -262,6 +266,7 @@ public class MetaBot extends AI {
         previousState = null;
         currentState = null;
         myPlayerNumber = -1;
+        learningAgent.resetChoice();
 
         choices = new ArrayList<>(3000);
 
@@ -281,6 +286,12 @@ public class MetaBot extends AI {
             );
         }
 
+        if(!state.canExecuteAnyAction(player)) {
+            PlayerAction pa = new PlayerAction();
+            pa.fillWithNones(state, player, 1);
+            return pa;
+        }
+        
         // makes the learning agent learn
         previousState = currentState;
         currentState = state.clone();

@@ -174,6 +174,10 @@ public class Sarsa {
         return nextChoice;
     }
 
+    public void resetChoice() {
+        nextChoice = null;
+    }
+
     /**
      * Returns an action using epsilon-greedy for the given state (i.e., a random
      * action with probability epsilon, and the greedy action otherwise)
@@ -252,7 +256,7 @@ public class Sarsa {
     public void learn(GameState state, AI choice, double reward, GameState nextState, boolean done, int player) {
 
         // ensures all variables are valid (they won't be in the initial state)
-        if (state == null || nextState == null || choice == null) {
+        if (state == null || choice == null) {
             return;
         }
 
