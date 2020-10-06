@@ -70,8 +70,8 @@ def generate_call(script, p1_seed=None, p2_seed=None,
         call.append(f'-sd {sticky_dur}')
     if output_path is not None:
         call.append(f'-o {output_path}')
-    # if log_path is not None:
-    #     call.append(f'> {log_path}')
+    if log_path is not None:
+        call.append(f'> {log_path}')
     return ' '.join(call)
 
 

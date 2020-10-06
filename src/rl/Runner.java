@@ -117,7 +117,7 @@ public class Runner {
             int result = headlessMatch(ai1, ai2, settings, utt, traceOutput);
             Date end = new Date(System.currentTimeMillis());
 
-            // System.out.print(String.format("\rMatch %8d finished with result %3d.", i+1, result));
+            System.out.print(String.format("\rMatch %8d finished with result %3d.", i+1, result));
             // logger.info(String.format("Match %8d finished.", i+1));
 
             long duration = end.getTime() - begin.getTime();
