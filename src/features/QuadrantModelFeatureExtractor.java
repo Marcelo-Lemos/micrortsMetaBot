@@ -43,7 +43,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
         // adds the 'global' features
         features.put(FeatureNames.RESOURCES_OWN, new Feature(FeatureNames.RESOURCES_OWN, 0, 0, 20));
         features.put(FeatureNames.RESOURCES_OPP, new Feature(FeatureNames.RESOURCES_OPP, 0, 0, 20));
-        features.put(FeatureNames.GAME_TIME, new Feature(FeatureNames.GAME_TIME, 0, 0, 12000));
+        features.put(FeatureNames.GAME_TIME, new Feature(FeatureNames.GAME_TIME, 0, 0, 3000));
         features.put(FeatureNames.BIAS, new Feature(FeatureNames.BIAS, 1, 0, 1));
 
         // adds the 'per-quadrant' features
@@ -63,7 +63,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
                 for (int player = 0; player < 2; player++) {
                     String healthFeatName = FeatureNames.avgHealthPerQuad(horizQuad, vertQuad, player);
 
-                    features.put(healthFeatName, new Feature(healthFeatName, 0, 0, tilesPerQuadrant * maxHitPoints));
+                    features.put(healthFeatName, new Feature(healthFeatName, 0, 0, 1));
 
                     // the fourth for traverses the unit types
                     for (UnitType type : state.getUnitTypeTable().getUnitTypes()) {
@@ -164,7 +164,7 @@ public class QuadrantModelFeatureExtractor extends FeatureExtractor {
                         continue; // ignores resources
 
                     unitCount[u.getPlayer()]++;
-                    hpSum[u.getPlayer()] += u.getHitPoints();
+                    hpSum[u.getPlayer()] += u.getHitPoints() / (float)u.getType().hp;
 
                     String name = FeatureNames.unitsOfTypePerQuad(horizQuad, vertQuad, u.getPlayer(), u.getType());
 

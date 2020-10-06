@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import ai.core.AI;
 import features.Feature;
@@ -344,6 +345,28 @@ public class Sarsa {
      */
     private double qValue(Map<String, Feature> features, String choice) {
         return dotProduct(features, weights.get(choice));
+    }
+
+    public Map<String, Float> getFeatures(GameState state, int player) {
+        Map<String, Feature> raw = featureExtractor.getFeatures(state, player);
+
+        Map<String, Float> features = new HashMap<String, Float>();
+        for (String f : raw.keySet()) {
+            features.put(f, raw.get(f).getValue());
+        }
+        return features;
+    }
+
+    public Map<String, Double> getQValues(GameState state, int player) {
+        Map<String, Feature> stateFeatures = featureExtractor.getFeatures(state, player);
+
+        Map<String, Double> qValues = new HashMap<String, Double>();
+        for (String ai : portfolio.keySet()) {
+            Double q = qValue(stateFeatures, ai);
+            qValues.put(ai, q);
+        }
+
+        return qValues;
     }
 
     /**

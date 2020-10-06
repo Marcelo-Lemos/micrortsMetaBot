@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import ai.core.AI;
 import config.ConfigManager;
 import metabot.MetaBot;
+import metabot.EpsilonLightRush;
 import rts.GameSettings;
 import rts.GameState;
 import rts.PartiallyObservableGameState;
@@ -44,6 +45,8 @@ public class Runner {
 
     public static void main(String[] args) throws Exception {
 
+        EpsilonLightRush ep;
+
         // Argument parser
         Options options = new Options();
 
@@ -57,6 +60,7 @@ public class Runner {
         options.addOption("b1", "binprefix1", false, "player 1 save binary weights");
         options.addOption("h1", "humanprefix1", false, "player 1 save human weights");
         options.addOption("bi1", "bininput1", true, "player 1 binary input");
+        options.addOption("sd", "stickyduration", true, "sticky actions duration");
 
         // Player 2 command line options
         options.addOption("s2", "seed2", true, "player 2 seed number");
@@ -113,7 +117,7 @@ public class Runner {
             int result = headlessMatch(ai1, ai2, settings, utt, traceOutput);
             Date end = new Date(System.currentTimeMillis());
 
-            System.out.print(String.format("\rMatch %8d finished with result %3d.", i+1, result));
+            // System.out.print(String.format("\rMatch %8d finished with result %3d.", i+1, result));
             // logger.info(String.format("Match %8d finished.", i+1));
 
             long duration = end.getTime() - begin.getTime();
@@ -307,14 +311,14 @@ public class Runner {
                     String opt = String.format("s%d", playerNumber);
                     if (cmd.hasOption(opt)) {
                         String value = cmd.getOptionValue(opt);
-                        logger.debug("Updating player {} seed to {}", playerNumber, value);
+                        logger.info("Updating player {} seed to {}", playerNumber, value);
                         metaBotConfig.setProperty("rl.random.seed", value);
                     }
                     
                     opt = String.format("d%d", playerNumber);
                     if (cmd.hasOption(opt)) {
                         String value = cmd.getOptionValue(opt);
-                        logger.debug("Updating player {} working directory to {}", playerNumber, value);
+                        logger.info("Updating player {} working directory to {}", playerNumber, value);
                         metaBotConfig.setProperty("rl.workingdir", value);
                     }
 
@@ -326,7 +330,7 @@ public class Runner {
 
                     opt = String.format("h%d", playerNumber);
                     if (cmd.hasOption(opt)) {
-                        logger.debug("Setting player {} 'save human weights' to true", playerNumber, cmd.getOptionValue(opt));
+                        logger.info("Setting player {} 'save human weights' to true", playerNumber, cmd.getOptionValue(opt));
                         metaBotConfig.setProperty("rl.save_weights_human", "true");
                     }
 
@@ -335,6 +339,14 @@ public class Runner {
                         String value = cmd.getOptionValue(opt);
                         logger.info("Setting player {} binary input to {}", playerNumber, value);
                         metaBotConfig.setProperty("rl.bin_input", value);
+                    }
+
+                    if (cmd.hasOption("sd")) {
+                        String value = cmd.getOptionValue("sd");
+                        logger.info("Setting sticky actions duration to {}", value);
+                        metaBotConfig.setProperty("rl.sticky_actions", value);
+                    } else {
+                        logger.info("Nope");
                     }
 
                     // Load AI
