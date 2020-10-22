@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 
 import ai.abstraction.HeavyRush;
+import ai.abstraction.LightRush;
 import ai.abstraction.RangedRush;
 import ai.abstraction.WorkerRush;
 import ai.core.AI;
@@ -45,6 +46,8 @@ public class EpsilonLightRush extends AI {
     }
 
     private void setupPortifolio() {
+        lightRush = new LightRush(unitTypeTable);
+
         portfolio = new HashMap<>();
         portfolio.put("WorkerRush", new WorkerRush(unitTypeTable));
         portfolio.put("RangedRush", new RangedRush(unitTypeTable));
