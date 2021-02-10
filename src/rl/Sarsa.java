@@ -232,9 +232,19 @@ public class Sarsa {
                 double q = qValue(features, aiName);
                 if (q > maxQ) {
                     maxQ = q;
-                    choiceName = aiName;
                 }
             }
+
+            List<String> possibleChoices = new ArrayList<>();
+            for (String aiName : weights.keySet()) {
+                double q = qValue(features, aiName);
+                if (Math.abs(maxQ - q) < 0.000001) {
+                    possibleChoices.add(aiName);
+                }
+            }
+
+            choiceName = possibleChoices.get(random.nextInt(possibleChoices.size()));
+
             if (choiceName == null) {
                 System.err.println("***ERROR!!!");
             }
@@ -305,7 +315,7 @@ public class Sarsa {
             futureQ = 0;
         } else {
             Map<String, Feature> nextStateFeatures = featureExtractor.getFeatures(nextState, player);
-            futureQ = qValue(nextStateFeatures, nextChoice);
+            futureQ = Math.max(-1, Math.min(1, qValue(nextStateFeatures, nextChoice)));
         }
 
         double q = qValue(stateFeatures, choice);
@@ -315,9 +325,19 @@ public class Sarsa {
 
         for (String featureName : stateFeatures.keySet()) {
             // retrieves the weight value, updates it and stores the updated value
-            float weightValue = weights.get(choice).get(featureName);
-            weightValue += alpha * delta * stateFeatures.get(featureName).getValue();
-            weights.get(choice).put(featureName, weightValue);
+            double oldWeightValue = weights.get(choice).get(featureName);
+            double newWeightValue = oldWeightValue + alpha * delta * stateFeatures.get(featureName).getValue();
+            weights.get(choice).put(featureName, (float) newWeightValue);
+            if (q <= -1 && qValue(stateFeatures, choice) < q) {
+                System.out.println("Error");
+                System.out.printf("q: %2f\n", q);
+                System.out.printf("future q: %2f\n", futureQ);
+                System.out.printf("old weight: %2f\n", oldWeightValue);
+                System.out.printf("delta: %2f\n", delta);
+                System.out.printf("alpha: %2f\n", alpha);
+                System.out.printf("new weight: %2f\n", newWeightValue);
+                System.out.printf("%s: %2f\n", featureName, stateFeatures.get(featureName).getValue());
+            }
         }
     }
 
@@ -344,7 +364,8 @@ public class Sarsa {
      * @return
      */
     private double qValue(Map<String, Feature> features, String choice) {
-        return dotProduct(features, weights.get(choice));
+        double value = dotProduct(features, weights.get(choice));
+        return Math.max(-1, Math.min(1, value));
     }
 
     public Map<String, Float> getFeatures(GameState state, int player) {

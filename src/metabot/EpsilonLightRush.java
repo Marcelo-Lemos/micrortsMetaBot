@@ -29,17 +29,17 @@ public class EpsilonLightRush extends AI {
     private Map<String, AI> portfolio;
 
     // Epsilon value and decay
-    private float epsilon = 0.5f;
-    private float decayRate = 0.99f;
+    private double epsilon = 0.2f;
+    private double decayRate = 0.9955f;
+    private String decayType = "exponential";
 
     public EpsilonLightRush(UnitTypeTable unitTypeTable) {
-        System.out.println("I was here!!!!!!!!!!!!!111");
         this.unitTypeTable = unitTypeTable;
         random = new Random();
         setupPortifolio();
     }
 
-    public EpsilonLightRush(UnitTypeTable unitTypeTable, Float epsilon, Float decayRate, Random random) {
+    public EpsilonLightRush(UnitTypeTable unitTypeTable, double epsilon, double decayRate, Random random) {
         this.unitTypeTable = unitTypeTable;
         this.random = random;
         setupPortifolio();
@@ -106,7 +106,11 @@ public class EpsilonLightRush extends AI {
     }
 
     private void decay() {
-        epsilon *= decayRate;
+        if (decayType == "linear") {
+            epsilon -= decayRate;
+        } else if (decayType == "exponential") {
+            epsilon *= decayRate;
+        }
     }
 
     private void concludeEpisode() {
