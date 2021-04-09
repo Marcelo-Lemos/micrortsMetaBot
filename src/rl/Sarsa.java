@@ -7,14 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import ai.core.AI;
 import features.Feature;
@@ -41,16 +39,6 @@ public class Sarsa {
      * quadrantDivision
      */
     private int quadrantDivision;
-
-    /**
-     * Probability of exploration
-     */
-    private double epsilon;
-
-    /**
-     * Decay rate of epsilon
-     */
-    private double epsilonDecayRate;
 
     /**
      * Learning rate
@@ -100,6 +88,8 @@ public class Sarsa {
 
     private String weightInitMethod;
 
+    private ExplorationStrategy explorationStrategy;
+
     /**
      * Loads the parameters from a specific Properties object
      * 
@@ -109,8 +99,9 @@ public class Sarsa {
     public Sarsa(Map<String, AI> portfolio, Properties config) {
         random = new Random(Integer.parseInt(config.getProperty("rl.random.seed")));
 
-        epsilon = Double.parseDouble(config.getProperty("rl.epsilon.initial", "0.1"));
-        epsilonDecayRate = Double.parseDouble(config.getProperty("rl.epsilon.decay", "1.0"));
+        double epsilon = Double.parseDouble(config.getProperty("rl.epsilon.initial", "0.1"));
+        double epsilonDecayRate = Double.parseDouble(config.getProperty("rl.epsilon.decay", "1.0"));
+        explorationStrategy = new EpsilonGreedy(epsilon, epsilonDecayRate, random);
 
         alpha = Double.parseDouble(config.getProperty("rl.alpha.initial", "0.1"));
         alphaDecayRate = Double.parseDouble(config.getProperty("rl.alpha.decay", "1.0"));
@@ -210,45 +201,13 @@ public class Sarsa {
 
             initializeWeights(portfolio.keySet(), featureExtractor.getFeatureNames(state), weightsMin, weightsMax);
         }
+
+
         // will choose the action for this state
-        String choiceName = null;
 
-        // Feature 'vector' encoded as a map: feature name -> feature value
-        Map<String, Feature> features = featureExtractor.getFeatures(state, player);
+        Map<String, Double> qValues = getQValues(state, player);
 
-        // epsilon-greedy:
-        if (random.nextFloat() < epsilon) { // random choice
-            // trick to randomly select from HashMap adapted from:
-            // https://stackoverflow.com/a/9919827/1251716
-            List<String> keys = new ArrayList<String>(portfolio.keySet());
-            choiceName = keys.get(random.nextInt(keys.size()));
-            if (choiceName == null) {
-                System.err.println("ERROR!!!");
-            }
-        } else { // greedy choice
-            double maxQ = Double.NEGATIVE_INFINITY; // because MIN_VALUE is positive =/
-
-            for (String aiName : weights.keySet()) {
-                double q = qValue(features, aiName);
-                if (q > maxQ) {
-                    maxQ = q;
-                }
-            }
-
-            List<String> possibleChoices = new ArrayList<>();
-            for (String aiName : weights.keySet()) {
-                double q = qValue(features, aiName);
-                if (Math.abs(maxQ - q) < 0.000001) {
-                    possibleChoices.add(aiName);
-                }
-            }
-
-            choiceName = possibleChoices.get(random.nextInt(possibleChoices.size()));
-
-            if (choiceName == null) {
-                System.err.println("***ERROR!!!");
-            }
-        }
+        String choiceName = explorationStrategy.selectAction(qValues);
 
         return portfolio.get(choiceName);
     }
@@ -285,8 +244,7 @@ public class Sarsa {
         if (done) {
             // decays alpha and epsilon
             alpha *= alphaDecayRate;
-            epsilon *= epsilonDecayRate;
-
+            explorationStrategy.concludeEpisode();
         }
 
     }
@@ -328,16 +286,6 @@ public class Sarsa {
             double oldWeightValue = weights.get(choice).get(featureName);
             double newWeightValue = oldWeightValue + alpha * delta * stateFeatures.get(featureName).getValue();
             weights.get(choice).put(featureName, (float) newWeightValue);
-            if (q <= -1 && qValue(stateFeatures, choice) < q) {
-                System.out.println("Error");
-                System.out.printf("q: %2f\n", q);
-                System.out.printf("future q: %2f\n", futureQ);
-                System.out.printf("old weight: %2f\n", oldWeightValue);
-                System.out.printf("delta: %2f\n", delta);
-                System.out.printf("alpha: %2f\n", alpha);
-                System.out.printf("new weight: %2f\n", newWeightValue);
-                System.out.printf("%s: %2f\n", featureName, stateFeatures.get(featureName).getValue());
-            }
         }
     }
 
