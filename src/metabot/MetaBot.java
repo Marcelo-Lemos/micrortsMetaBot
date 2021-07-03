@@ -12,16 +12,9 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import ai.PassiveAI;
-import ai.abstraction.HeavyRush;
-import ai.abstraction.LightRush;
-import ai.abstraction.RangedRush;
-import ai.abstraction.WorkerRush;
 import ai.core.AI;
 import ai.core.ParameterSpecification;
 import config.ConfigManager;
-import metabot.portfolio.BuildBarracks;
-import metabot.portfolio.Expand;
 import rl.Sarsa;
 import rts.GameState;
 import rts.PlayerAction;
@@ -212,35 +205,19 @@ public class MetaBot extends AI {
     // }
 
     private void setupPortifolio(String members) {
-        String[] memberNames = members.split(",");
+        String[] memberNames = members.split(", ");
         logger.trace("Portfolio members: ", String.join(",", memberNames));
 
         // loads the portfolio according to the file specification
         portfolio = new HashMap<>();
 
-        // TODO get rid of this for-switch and do something like
-        // https://stackoverflow.com/a/6094609/1251716
-        for (String name : memberNames) {
-            name = name.trim();
-
-            if (name.equalsIgnoreCase("WorkerRush")) {
-                portfolio.put("WorkerRush", new WorkerRush(myUnitTypeTable));
-            } else if (name.equalsIgnoreCase("LightRush")) {
-                portfolio.put("LightRush", new LightRush(myUnitTypeTable));
-            } else if (name.equalsIgnoreCase("RangedRush")) {
-                portfolio.put("RangedRush", new RangedRush(myUnitTypeTable));
-            } else if (name.equalsIgnoreCase("HeavyRush")) {
-                portfolio.put("HeavyRush", new HeavyRush(myUnitTypeTable));
-            } else if (name.equalsIgnoreCase("Expand")) {
-                portfolio.put("Expand", new Expand(myUnitTypeTable));
-            } else if (name.equalsIgnoreCase("BuildBarracks")) {
-                portfolio.put("BuildBarracks", new BuildBarracks(myUnitTypeTable));
-            } else if (name.equalsIgnoreCase("PassiveAI")) {
-                portfolio.put("PassiveAI", new PassiveAI(myUnitTypeTable));
+        for (String memberName : memberNames) {
+            try {
+                AI ai = (AI) Class.forName(memberName).getConstructor(UnitTypeTable.class).newInstance(myUnitTypeTable);
+                portfolio.put(memberName, ai);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-
-            else
-                throw new RuntimeException("Unknown portfolio member '" + name + "'");
         }
     }
 
